@@ -1,0 +1,15 @@
+<resources>
+    <color name="text_title">#CC000000</color>
+    <color name="light_blue">#03a9f4</color>
+    <color name="primary">#673ab7</color>
+    <color name="primary_dark">#512da8</color>
+    <color name="accent">#ffc400</color>
+    <color name="text_primary">#D9FFFFFF</color>
+    <color name="text_secondary">#D9000000</color>
+    <color name="white">#ffffff</color>
+    <color name="canvas_background">#e3f2fd</color>
+    <color name="canvas_background_line">#d2e1ec</color>
+    <color name="idle_vertex">#eeeeee</color>
+    <color name="actionbar_bg">#1e88e5</color>
+    <color name="blue">#aaaaff</color>
+</resources>

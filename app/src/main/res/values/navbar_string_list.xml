@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="navbar_string_array">
+        <item>New file</item>
+        <item>Open file</item>
+        <item>Save file</item>
+        <item>Clear field</item>
+    </string-array>
+</resources>
