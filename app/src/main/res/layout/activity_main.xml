@@ -8,16 +8,16 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <SurfaceView
+        <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/canvas_bg">
-        </SurfaceView>
-        <SurfaceView
+        </ImageView>
+        <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/canvas_main">
-        </SurfaceView>
+        </ImageView>
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -45,12 +45,11 @@
                 android:layout_height="55dp"
                 android:textSize="20sp"
                 android:text="Menu"
-                android:textColor="@color/material_blue_grey_800"
+                android:textColor="@color/white"
                 android:gravity="center_vertical"
                 android:paddingLeft="20dp"
-                android:background="#ccf"
-                android:shadowRadius="1"
-                android:shadowDy="0.5"/>
+                android:background="@drawable/toolbar_gradient"
+                android:id="@+id/navbarTitle" />
 
             <FrameLayout
                 android:layout_width="match_parent"

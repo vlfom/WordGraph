@@ -12,7 +12,17 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:theme="@style/ToolbarTheme" />
+        app:theme="@style/ToolbarTheme" >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Word Graph"
+            android:textSize="26sp"
+            android:layout_marginBottom="15dp"
+            android:textColor="@android:color/white"
+            android:id="@+id/actionbarTitle"
+            android:background="@android:color/transparent" />
+     </android.support.v7.widget.Toolbar>
 
     <FrameLayout
         android:layout_width="match_parent"

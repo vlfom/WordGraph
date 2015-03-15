@@ -10,6 +10,8 @@
     <color name="canvas_background">#e3f2fd</color>
     <color name="canvas_background_line">#d2e1ec</color>
     <color name="idle_vertex">#eeeeee</color>
-    <color name="actionbar_bg">#1e88e5</color>
+    <color name="actionbar_bg">#0c66c3</color>
+    <color name="actionbar_bg_dark">#060060</color>
     <color name="blue">#aaaaff</color>
+    <color name="navbar_text_color">#1e88e5</color>
 </resources>

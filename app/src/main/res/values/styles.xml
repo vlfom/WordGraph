@@ -3,11 +3,19 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
+        <item name="android:actionBarItemBackground">@android:color/transparent</item>
+        <item name="actionBarItemBackground">@android:color/transparent</item>
     </style>
 
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.ActionBar">
         <!-- Customize your theme here. -->
-        <item name="android:background">@color/actionbar_bg</item>
+        <item name="android:actionBarItemBackground">@android:color/transparent</item>
+        <item name="actionBarItemBackground">@android:color/transparent</item>
+        <item name="android:title">@android:color/transparent</item>
+        <item name="android:titleTextStyle">@android:color/transparent</item>
+        <item name="android:titleCondensed">@android:color/transparent</item>
+        <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
+        <item name="android:background">@drawable/toolbar_gradient</item>
         <item name="android:shadowDy">1</item>
         <item name="android:shadowRadius">2</item>
         <item name="android:shadowColor">#000000</item>
