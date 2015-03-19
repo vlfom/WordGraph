@@ -17,8 +17,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Word Graph"
-            android:textSize="26sp"
-            android:layout_marginBottom="15dp"
+            android:textSize="24sp"
+            android:layout_marginBottom="16dp"
             android:textColor="@android:color/white"
             android:id="@+id/actionbarTitle"
             android:background="@android:color/transparent" />

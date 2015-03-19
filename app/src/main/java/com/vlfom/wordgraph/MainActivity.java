@@ -12,21 +12,14 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.os.Vibrator;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.BackgroundColorSpan;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -35,7 +28,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -44,7 +36,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,10 +47,14 @@ import java.util.ArrayList;
 
 public class MainActivity extends ActionBarActivity {
 
-    private Integer empty_nodes_counter = 0;
+    final Integer
+            NUMBER_NODE_TYPE = 1,
+            TEXT_NODE_TYPE = 2;
     private final int
-            node_height = 80,
-            small_node_diameter = 60;
+            node_diameter = 60,
+            small_node_diameter = 40;
+    private final Handler handler = new Handler();
+    private Integer number_nodes_counter = 0;
     private RelativeLayout mainLayout;
     private int[] mainDisplacement = new int[2];
     private ImageView canvasLayout;
@@ -70,15 +65,27 @@ public class MainActivity extends ActionBarActivity {
             Nodes = new ArrayList<>();
     private ArrayList<ArrayList<Integer>>
             Edges = new ArrayList<>();
-    private ArrayList<Pair<String, Boolean>>
-            NodesText = new ArrayList<>();
+    private ArrayList<Pair<String, Integer>>
+            NodesInfo = new ArrayList<>();
     private ArrayList<Point>
             NodesPos = new ArrayList<>();
     private int
             vertexPressed = 0,
+            vertexTypePressed = 0,
             vertexIndexPressed = 0,
-            vertexIndexFocused = -1;
+            vertexTypeFocused = 0,
+            vertexIndexFocused = 0;
+    private final Runnable checkLongTouch = new Runnable() {
+        public void run() {
+            if (vertexPressed == -1)
+                return;
+            vertexPressed = 2;
 
+            ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(100);
+
+            setFocusedVertex(vertexIndexPressed, vertexTypePressed, 1);
+        }
+    };
     private String[] mScreenTitles;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -86,15 +93,17 @@ public class MainActivity extends ActionBarActivity {
     private String
             mDrawerTitle,
             mTitle;
+    private Pair<Point, Point> tempLine = null;
+    private ArrayList<Pair<Integer, Integer>> mSegments = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ((TextView) findViewById(R.id.navbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Roboto-Regular.ttf")) ;
+        ((TextView) findViewById(R.id.navbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
         ((TextView) findViewById(R.id.navbarTitle)).setShadowLayer(2, 0, 1, Color.BLACK);
-        ((TextView) findViewById(R.id.actionbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(),"fonts/Roboto-Regular.ttf")) ;
+        ((TextView) findViewById(R.id.actionbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
         ((TextView) findViewById(R.id.actionbarTitle)).setShadowLayer(2, 0, 1, Color.BLACK);
 
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -111,7 +120,7 @@ public class MainActivity extends ActionBarActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+        mDrawerList.setAdapter(new ArrayAdapter<>(this,
                 R.layout.navbar_list_item, mScreenTitles));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
@@ -140,7 +149,7 @@ public class MainActivity extends ActionBarActivity {
         surfacePaint = new Paint();
         surfacePaint.setAntiAlias(true);
         surfacePaint.setDither(true);
-        surfacePaint.setStrokeWidth(5);
+        surfacePaint.setStrokeWidth(3);
         surfacePaint.setColor(Color.rgb(20, 45, 135));
         surfacePaint.setStyle(Paint.Style.STROKE);
 
@@ -162,7 +171,7 @@ public class MainActivity extends ActionBarActivity {
                         editText.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                         relativeLayout.addView(editText);
 
-                        final AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
+                        new AlertDialog.Builder(MainActivity.this)
                                 .setTitle("Enter vertex value:")
                                 .setView(relativeLayout)
                                 .setNegativeButton("Create text node", new DialogInterface.OnClickListener() {
@@ -171,13 +180,13 @@ public class MainActivity extends ActionBarActivity {
                                         if (enteredText.equals(""))
                                             enteredText = ".......";
 
-                                        addNewNode(touchPoint, enteredText, true, false);
+                                        addNewNode(touchPoint, enteredText, TEXT_NODE_TYPE, false);
                                     }
                                 })
                                 .setPositiveButton("Create empty node", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int whichButton) {
-                                        ++empty_nodes_counter;
-                                        addNewNode(touchPoint, empty_nodes_counter.toString(), false, false);
+                                        ++number_nodes_counter;
+                                        addNewNode(touchPoint, number_nodes_counter.toString(), NUMBER_NODE_TYPE, false);
                                     }
                                 })
                                 .show();
@@ -188,12 +197,23 @@ public class MainActivity extends ActionBarActivity {
         );
     }
 
-    private void addNewNode(Point nodePos, String nodeText, boolean nodeType, boolean addType) {
+    private void addNewNode(Point nodePos, String nodeText, int nodeType, boolean addType) {
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final FrameLayout frameLayout = (FrameLayout) layoutInflater.inflate(R.layout.simple_number_vertex, null);
+        final FrameLayout frameLayout;
+
+        if (nodeType == NUMBER_NODE_TYPE)
+            frameLayout = (FrameLayout) layoutInflater.inflate(R.layout.number_vertex, null);
+        else if (nodeType == TEXT_NODE_TYPE)
+            frameLayout = (FrameLayout) layoutInflater.inflate(R.layout.text_vertex, null);
+        else
+            frameLayout = (FrameLayout) layoutInflater.inflate(R.layout.text_vertex, null);
 
         frameLayout.setOnTouchListener(
                 new View.OnTouchListener() {
+                    private final int NodeIndex = Nodes.size();
+                    private final float BOUNDARY_MOVE = 10;
+                    RelativeLayout.LayoutParams layoutParams;
+                    RelativeLayout.LayoutParams mParams;
                     private float dx
                             ,
                             dy
@@ -201,10 +221,6 @@ public class MainActivity extends ActionBarActivity {
                             sX
                             ,
                             sY;
-                    private final int NodeIndex = Nodes.size();
-                    private final float BOUNDARY_MOVE = 10;
-                    RelativeLayout.LayoutParams layoutParams;
-                    RelativeLayout.LayoutParams mParams;
 
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
@@ -222,13 +238,22 @@ public class MainActivity extends ActionBarActivity {
                                 }
 
                                 vertexIndexPressed = NodeIndex;
-
-                                Log.e("WOW", "WOW");
+                                vertexTypePressed = NodesInfo.get(NodeIndex).second;
                             }
                             break;
                             case MotionEvent.ACTION_MOVE: {
+//                                if (event.getRawY() - dy - Nodes.get(NodeIndex).getLayoutParams().height / 2 - getSupportActionBar().getHeight() <= 0)
+//                                    break;
+//                                Log.d("MY", getSupportActionBar().getHeight() + " " + layoutParams.topMargin + " " + (event.getRawY() + Nodes.get(NodeIndex).getLayoutParams().height / 2) + " " + getWindowManager().getDefaultDisplay().getHeight()) ;
+//                                if (event.getRawY() + Nodes.get(NodeIndex).getLayoutParams().height / 2 >= getWindowManager().getDefaultDisplay().getHeight())
+//                                    break;
+//                                if (event.getRawX() - dx - Nodes.get(NodeIndex).getLayoutParams().width / 2 <= 0)
+//                                    break;
+//                                if (event.getRawX() + dx + Nodes.get(NodeIndex).getLayoutParams().width / 2 >= getWindowManager().getDefaultDisplay().getWidth())
+//                                    break;
+
                                 if (vertexIndexFocused != -1)
-                                    unsetFocusedVertex(vertexIndexFocused);
+                                    unsetFocusedVertex(vertexIndexFocused, vertexTypeFocused);
 
                                 if (vertexPressed == 1 && Math.sqrt(
                                         Math.pow(event.getRawX() - sX, 2) +
@@ -246,7 +271,6 @@ public class MainActivity extends ActionBarActivity {
                                     int foundNode = -1;
                                     for (int i = 0; i < Nodes.size(); ++i)
                                         if (i != NodeIndex && !Edges.get(NodeIndex).contains(i)) {
-                                            mParams = (RelativeLayout.LayoutParams) Nodes.get(i).getLayoutParams();
                                             if (checkNodeIntersection(i, new Point((int) event.getRawX(), (int) event.getRawY()))) {
                                                 foundNode = i;
                                                 break;
@@ -254,12 +278,15 @@ public class MainActivity extends ActionBarActivity {
                                         }
                                     if (foundNode != -1) {
                                         vertexIndexFocused = foundNode;
-                                        setFocusedVertex(vertexIndexFocused, 2);
+                                        vertexTypeFocused = NodesInfo.get(foundNode).second;
+                                        setFocusedVertex(vertexIndexFocused, vertexTypeFocused, 2);
                                     }
                                 } else {
                                     float x = event.getRawX(), y = event.getRawY();
-                                    layoutParams.leftMargin = (int) (x - dx);
-                                    layoutParams.topMargin = (int) (y - dy);
+                                    if( (int)(y-dy) >= getSupportActionBar().getHeight() && (int)(y-dy) + v.getHeight() <= getWindowManager().getDefaultDisplay().getHeight() )
+                                        layoutParams.topMargin = (int) (y - dy);
+                                    if( (int)(x-dx) >= 0 && (int)(x-dx) + v.getWidth() <= getWindowManager().getDefaultDisplay().getWidth() )
+                                        layoutParams.leftMargin = (int) (x - dx);
                                     v.setLayoutParams(layoutParams);
 
                                     NodesPos.set(NodeIndex, new Point((int) (x - dx), (int) (y - dy)));
@@ -272,10 +299,9 @@ public class MainActivity extends ActionBarActivity {
                             break;
                             case MotionEvent.ACTION_UP: {
                                 if (vertexIndexFocused != -1)
-                                    unsetFocusedVertex(vertexIndexFocused);
-
+                                    unsetFocusedVertex(vertexIndexFocused, vertexTypeFocused);
                                 if (vertexPressed == 2) {
-                                    unsetFocusedVertex(vertexIndexPressed);
+                                    unsetFocusedVertex(vertexIndexPressed, vertexTypePressed);
 
                                     int foundNode = -1;
                                     for (int i = 0; i < Nodes.size(); ++i)
@@ -310,16 +336,17 @@ public class MainActivity extends ActionBarActivity {
         ((TextView) frameLayout.findViewById(R.id.vertex_number)).setText(nodeText);
 
         RelativeLayout.LayoutParams mNParams;
-        if (nodeType) {
-            mNParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, node_height);
+        if (nodeType == TEXT_NODE_TYPE) {
+            mNParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, node_diameter);
+            frameLayout.setMinimumWidth(node_diameter);
             if (!addType) {
-                mNParams.leftMargin = nodePos.x - (int) frameLayout.getWidth() / 2;
-                mNParams.topMargin = nodePos.y - node_height / 2;
+                mNParams.leftMargin = nodePos.x - frameLayout.getWidth() / 2;
+                mNParams.topMargin = nodePos.y - node_diameter / 2;
             } else {
                 mNParams.leftMargin = nodePos.x;
                 mNParams.topMargin = nodePos.y;
             }
-        } else {
+        } else if (nodeType == NUMBER_NODE_TYPE) {
             mNParams = new RelativeLayout.LayoutParams(small_node_diameter, small_node_diameter);
             if (!addType) {
                 mNParams.leftMargin = nodePos.x - small_node_diameter / 2;
@@ -328,14 +355,15 @@ public class MainActivity extends ActionBarActivity {
                 mNParams.leftMargin = nodePos.x;
                 mNParams.topMargin = nodePos.y;
             }
-        }
+        } else
+            mNParams = new RelativeLayout.LayoutParams(small_node_diameter, small_node_diameter);
         frameLayout.setLayoutParams(mNParams);
 
         Nodes.add(frameLayout);
         mainLayout.addView(frameLayout);
 
         if (!addType) {
-            NodesText.add(new Pair<>(nodeText, nodeType));
+            NodesInfo.add(new Pair<>(nodeText, nodeType));
             NodesPos.add(new Point(mNParams.leftMargin, mNParams.topMargin));
             Edges.add(new ArrayList<Integer>());
             redrawCanvas();
@@ -351,19 +379,6 @@ public class MainActivity extends ActionBarActivity {
         int a = Nodes.get(nodeIndex).getWidth() / 2, b = Nodes.get(nodeIndex).getHeight() / 2;
         return Math.pow((ellipseCenter.x - mPoint.x) * 1. / a, 2) + Math.pow((ellipseCenter.y - mPoint.y) * 1. / b, 2) <= 1;
     }
-
-    private final Handler handler = new Handler();
-    private final Runnable checkLongTouch = new Runnable() {
-        public void run() {
-            if (vertexPressed == -1)
-                return;
-            vertexPressed = 2;
-
-            ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(100);
-
-            setFocusedVertex(vertexIndexPressed, 1);
-        }
-    };
 
     private void drawBackground() {
         ImageView imageView = (ImageView) findViewById(R.id.canvas_bg);
@@ -393,9 +408,6 @@ public class MainActivity extends ActionBarActivity {
         canvasLayout.setImageDrawable(new BitmapDrawable(getResources(), surfaceBitmap));
     }
 
-    private Pair<Point, Point> tempLine = null;
-    private ArrayList<Pair<Integer, Integer>> mSegments = new ArrayList<>();
-
     private void redrawCanvas() {
         surfaceCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
@@ -415,25 +427,38 @@ public class MainActivity extends ActionBarActivity {
         canvasLayout.setImageDrawable(new BitmapDrawable(getResources(), surfaceBitmap));
     }
 
-    private void setFocusedVertex(int vertexIndex, int type) {
-        if (type == 1)
-            ((ImageView) Nodes.get(vertexIndex).
-                    findViewById(R.id.vertex_node)).setImageResource(R.drawable.simple_number_vertex_selected);
-        else
-            ((ImageView) Nodes.get(vertexIndex).
-                    findViewById(R.id.vertex_node)).setImageResource(R.drawable.simple_number_vertex_focused);
+    private void setFocusedVertex(int vertexIndex, int vertexType, int selectType) {
+        if (selectType == 1) {
+            if (vertexType == 1)
+                ((ImageView) Nodes.get(vertexIndex).
+                        findViewById(R.id.vertex_node)).setImageResource(R.drawable.number_vertex_selected);
+            else
+                ((ImageView) Nodes.get(vertexIndex).
+                        findViewById(R.id.vertex_node)).setImageResource(R.drawable.text_vertex_selected);
+        } else if (selectType == 2) {
+            if (vertexType == 1)
+                ((ImageView) Nodes.get(vertexIndex).
+                        findViewById(R.id.vertex_node)).setImageResource(R.drawable.number_vertex_focused);
+            else
+                ((ImageView) Nodes.get(vertexIndex).
+                        findViewById(R.id.vertex_node)).setImageResource(R.drawable.text_vertex_focused);
+        }
     }
 
-    private void unsetFocusedVertex(int vertexIndex) {
-        ((ImageView) Nodes.get(vertexIndex).
-                findViewById(R.id.vertex_node)).setImageResource(R.drawable.simple_number_vertex);
+    private void unsetFocusedVertex(int vertexIndex, int vertexType) {
+        if (vertexType == 1)
+            ((ImageView) Nodes.get(vertexIndex).
+                    findViewById(R.id.vertex_node)).setImageResource(R.drawable.number_vertex);
+        else
+            ((ImageView) Nodes.get(vertexIndex).
+                    findViewById(R.id.vertex_node)).setImageResource(R.drawable.text_vertex);
     }
 
     private void checkNodesCollision(final int NodeIndex) {
         //Is it really necessary?
         /*
         for( FrameLayout Node : Nodes ) {
-            if( Node != Nodes.get(NodeIndex) && Math.abs( Node.getX()-Nodes.get(NodeIndex).getX() ) <= node_height ) {
+            if( Node != Nodes.get(NodeIndex) && Math.abs( Node.getX()-Nodes.get(NodeIndex).getX() ) <= node_diameter ) {
 
             }
         }
@@ -451,13 +476,6 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectItem(position);
-        }
     }
 
     /**
@@ -504,14 +522,15 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void setDefault() {
-        empty_nodes_counter = 0;
+        mSegments = new ArrayList<>();
+        redrawCanvas();
+        number_nodes_counter = 0;
         for (FrameLayout node : Nodes)
             mainLayout.removeView(node);
-        NodesText = new ArrayList<>();
+        NodesInfo = new ArrayList<>();
         NodesPos = new ArrayList<>();
         Nodes = new ArrayList<>();
         Edges = new ArrayList<>();
-        mSegments = new ArrayList<>();
     }
 
     private void loadInfo() {
@@ -526,15 +545,15 @@ public class MainActivity extends ActionBarActivity {
             int nodes_counter = objectInputStream.readInt();
 
             for (int i = 0; i < nodes_counter; ++i)
-                NodesText.add(new Pair<>((String) objectInputStream.readObject(), objectInputStream.readBoolean()));
+                NodesInfo.add(new Pair<>((String) objectInputStream.readObject(), objectInputStream.readInt()));
 
             for (int i = 0; i < nodes_counter; ++i)
                 NodesPos.add(new Point(objectInputStream.readInt(), objectInputStream.readInt()));
 
             for (int i = 0; i < nodes_counter; ++i) {
-                if (!NodesText.get(i).second)
-                    ++empty_nodes_counter;
-                addNewNode(NodesPos.get(i), NodesText.get(i).first, NodesText.get(i).second, true);
+                if (NodesInfo.get(i).second == 1)
+                    ++number_nodes_counter;
+                addNewNode(NodesPos.get(i), NodesInfo.get(i).first, NodesInfo.get(i).second, true);
             }
 
             for (int i = 0; i < nodes_counter; ++i) {
@@ -563,8 +582,8 @@ public class MainActivity extends ActionBarActivity {
             objectOutputStream.writeInt(Nodes.size());
 
             for (int i = 0; i < Nodes.size(); ++i) {
-                objectOutputStream.writeObject(NodesText.get(i).first);
-                objectOutputStream.writeBoolean(NodesText.get(i).second);
+                objectOutputStream.writeObject(NodesInfo.get(i).first);
+                objectOutputStream.writeInt(NodesInfo.get(i).second);
             }
 
             for (int i = 0; i < Nodes.size(); ++i) {
@@ -587,6 +606,13 @@ public class MainActivity extends ActionBarActivity {
             objectOutputStream.flush();
             objectOutputStream.close();
         } catch (Exception ex) {
+        }
+    }
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            selectItem(position);
         }
     }
 }
