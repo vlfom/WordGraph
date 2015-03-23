@@ -20,7 +20,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -55,7 +54,7 @@ public class MainActivity extends ActionBarActivity {
             MODE_NONE = 0,
             MODE_CREATE = 1,
             MODE_CONNECT = 2,
-            MODE_REMOVE = 3 ;
+            MODE_DELETE = 3 ;
     private final int
             node_diameter = 60,
             small_node_diameter = 40;
@@ -255,10 +254,30 @@ public class MainActivity extends ActionBarActivity {
             }
             else if( (currentMode == MODE_NONE || currentMode == MODE_CONNECT) &&
                     v.getId() == R.id.onModeConnect ) {
+                if( currentMode == MODE_NONE ) {
+                    currentMode = MODE_CONNECT;
+                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(0.5f) ;
+                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(0.5f) ;
+                }
+                else {
+                    currentMode = MODE_NONE;
+                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(1f) ;
+                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(1f) ;
+                }
 
             }
-            else if( (currentMode == MODE_NONE || currentMode == MODE_REMOVE) &&
+            else if( (currentMode == MODE_NONE || currentMode == MODE_DELETE) &&
                     v.getId() == R.id.onModeDelete ) {
+                if( currentMode == MODE_NONE ) {
+                    currentMode = MODE_DELETE;
+                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(0.5f) ;
+                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(0.5f) ;
+                }
+                else {
+                    currentMode = MODE_NONE;
+                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(1f) ;
+                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(1f) ;
+                }
 
             }
             return false;
