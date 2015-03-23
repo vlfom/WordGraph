@@ -33,6 +33,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -54,11 +55,11 @@ public class MainActivity extends ActionBarActivity {
             MODE_NONE = 0,
             MODE_CREATE = 1,
             MODE_CONNECT = 2,
-            MODE_DELETE = 3 ;
+            MODE_DELETE = 3;
+    private int currentMode = MODE_NONE;
     private final int
             node_diameter = 60,
             small_node_diameter = 40;
-    private int currentMode = MODE_NONE ;
     private final Handler handler = new Handler();
     private Integer number_nodes_counter = 0;
     private RelativeLayout mainLayout;
@@ -178,16 +179,16 @@ public class MainActivity extends ActionBarActivity {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         float x = event.getRawX(), y = event.getRawY();
-                        if( (int)y - node_diameter < getSupportActionBar().getHeight() ||
-                                (int)y + node_diameter +
+                        if ((int) y - node_diameter < getSupportActionBar().getHeight() ||
+                                (int) y + node_diameter +
                                         TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 75, getResources().getDisplayMetrics()) >
-                                        getWindowManager().getDefaultDisplay().getHeight() )
-                            return false ;
-                        if( (int)x - node_diameter < 0 ||
-                                (int)x + node_diameter > getWindowManager().getDefaultDisplay().getWidth() )
-                            return false ;
+                                        getWindowManager().getDefaultDisplay().getHeight())
+                            return false;
+                        if ((int) x - node_diameter < 0 ||
+                                (int) x + node_diameter > getWindowManager().getDefaultDisplay().getWidth())
+                            return false;
 
-                        if( currentMode == MODE_CREATE ) {
+                        if (currentMode == MODE_CREATE) {
                             final Point touchPoint = new Point((int) event.getX(), (int) event.getY());
                             mainLayout.getLocationOnScreen(mainDisplacement);
 
@@ -223,65 +224,8 @@ public class MainActivity extends ActionBarActivity {
                     }
                 }
         );
-    }
 
-    private class ChangeModeListener implements View.OnTouchListener {
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-
-            ((FrameLayout) findViewById(R.id.onModeCreate)).setOnTouchListener(
-                    new ChangeModeListener()
-            );
-            ((FrameLayout) findViewById(R.id.onModeConnect)).setOnTouchListener(
-                    new ChangeModeListener()
-            );
-            ((FrameLayout) findViewById(R.id.onModeDelete)).setOnTouchListener(
-                    new ChangeModeListener()
-            );
-
-            if( (currentMode == MODE_NONE || currentMode == MODE_CREATE) &&
-                    v.getId() == R.id.onModeCreate ) {
-                if( currentMode == MODE_NONE ) {
-                    currentMode = MODE_CREATE;
-                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(0.5f) ;
-                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(0.5f) ;
-                }
-                else {
-                    currentMode = MODE_NONE;
-                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(1f) ;
-                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(1f) ;
-                }
-            }
-            else if( (currentMode == MODE_NONE || currentMode == MODE_CONNECT) &&
-                    v.getId() == R.id.onModeConnect ) {
-                if( currentMode == MODE_NONE ) {
-                    currentMode = MODE_CONNECT;
-                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(0.5f) ;
-                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(0.5f) ;
-                }
-                else {
-                    currentMode = MODE_NONE;
-                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(1f) ;
-                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(1f) ;
-                }
-
-            }
-            else if( (currentMode == MODE_NONE || currentMode == MODE_DELETE) &&
-                    v.getId() == R.id.onModeDelete ) {
-                if( currentMode == MODE_NONE ) {
-                    currentMode = MODE_DELETE;
-                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(0.5f) ;
-                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(0.5f) ;
-                }
-                else {
-                    currentMode = MODE_NONE;
-                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(1f) ;
-                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(1f) ;
-                }
-
-            }
-            return false;
-        }
+        ((LinearLayout) findViewById(R.id.navigationDrawer)).setAlpha(0.8f);
     }
 
     private void addNewNode(Point nodePos, String nodeText, int nodeType, boolean addType) {
@@ -360,9 +304,9 @@ public class MainActivity extends ActionBarActivity {
                                     }
                                 } else {
                                     float x = event.getRawX(), y = event.getRawY();
-                                    if( (int)(y-dy) >= getSupportActionBar().getHeight() && (int)(y-dy) + v.getHeight() + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 75, getResources().getDisplayMetrics()) <= getWindowManager().getDefaultDisplay().getHeight() )
+                                    if ((int) (y - dy) >= getSupportActionBar().getHeight() && (int) (y - dy) + v.getHeight() + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 75, getResources().getDisplayMetrics()) <= getWindowManager().getDefaultDisplay().getHeight())
                                         layoutParams.topMargin = (int) (y - dy);
-                                    if( (int)(x-dx) >= 0 && (int)(x-dx) + v.getWidth() <= getWindowManager().getDefaultDisplay().getWidth() )
+                                    if ((int) (x - dx) >= 0 && (int) (x - dx) + v.getWidth() <= getWindowManager().getDefaultDisplay().getWidth())
                                         layoutParams.leftMargin = (int) (x - dx);
                                     v.setLayoutParams(layoutParams);
 
@@ -683,6 +627,60 @@ public class MainActivity extends ActionBarActivity {
             objectOutputStream.flush();
             objectOutputStream.close();
         } catch (Exception ex) {
+        }
+    }
+
+    private class ChangeModeListener implements View.OnTouchListener {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+
+            ((FrameLayout) findViewById(R.id.onModeCreate)).setOnTouchListener(
+                    new ChangeModeListener()
+            );
+            ((FrameLayout) findViewById(R.id.onModeConnect)).setOnTouchListener(
+                    new ChangeModeListener()
+            );
+            ((FrameLayout) findViewById(R.id.onModeDelete)).setOnTouchListener(
+                    new ChangeModeListener()
+            );
+
+            if ((currentMode == MODE_NONE || currentMode == MODE_CREATE) &&
+                    v.getId() == R.id.onModeCreate) {
+                if (currentMode == MODE_NONE) {
+                    currentMode = MODE_CREATE;
+                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(0.5f);
+                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(0.5f);
+                } else {
+                    currentMode = MODE_NONE;
+                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(1f);
+                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(1f);
+                }
+            } else if ((currentMode == MODE_NONE || currentMode == MODE_CONNECT) &&
+                    v.getId() == R.id.onModeConnect) {
+                if (currentMode == MODE_NONE) {
+                    currentMode = MODE_CONNECT;
+                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(0.5f);
+                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(0.5f);
+                } else {
+                    currentMode = MODE_NONE;
+                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(1f);
+                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(1f);
+                }
+
+            } else if ((currentMode == MODE_NONE || currentMode == MODE_DELETE) &&
+                    v.getId() == R.id.onModeDelete) {
+                if (currentMode == MODE_NONE) {
+                    currentMode = MODE_DELETE;
+                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(0.5f);
+                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(0.5f);
+                } else {
+                    currentMode = MODE_NONE;
+                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(1f);
+                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(1f);
+                }
+
+            }
+            return false;
         }
     }
 

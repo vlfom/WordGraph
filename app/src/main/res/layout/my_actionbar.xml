@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/myToolbar"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="top"
-    android:orientation="vertical"
-    android:id="@+id/myToolbar">
+    android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:theme="@style/ToolbarTheme" >
+        app:theme="@style/ToolbarTheme">
+
         <TextView
+            android:id="@+id/actionbarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Word Graph"
-            android:textSize="24sp"
             android:layout_marginBottom="16dp"
+            android:background="@android:color/transparent"
+            android:text="Word Graph"
             android:textColor="@android:color/white"
-            android:id="@+id/actionbarTitle"
-            android:background="@android:color/transparent" />
-     </android.support.v7.widget.Toolbar>
+            android:textSize="24sp" />
+    </android.support.v7.widget.Toolbar>
 
     <FrameLayout
         android:layout_width="match_parent"

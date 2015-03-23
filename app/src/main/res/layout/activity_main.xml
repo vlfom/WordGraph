@@ -1,119 +1,130 @@
-<android.support.v4.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <!-- The main content view -->
-    <FrameLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <ImageView
+            android:id="@+id/canvas_bg"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/canvas_bg">
-        </ImageView>
+            android:layout_height="match_parent"></ImageView>
+
         <ImageView
+            android:id="@+id/canvas_main"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/canvas_main">
-        </ImageView>
+            android:layout_height="match_parent"></ImageView>
+
+        <RelativeLayout
+            android:id="@+id/layout_main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></RelativeLayout>
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/layout_main">
-        </RelativeLayout>
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal"
-            android:layout_marginBottom="10dp" >
+            android:layout_marginBottom="10dp"
+            android:gravity="center_horizontal">
+
             <LinearLayout
-                android:background="@drawable/mode_bar_background"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
                 android:layout_width="260dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true" >
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/mode_bar_background"
+                android:paddingBottom="5dp"
+                android:paddingTop="5dp">
+
                 <FrameLayout
+                    android:id="@+id/onModeCreate"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:id="@+id/onModeCreate" >
+                    android:layout_weight="1">
+
                     <ImageView
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@drawable/circle_main_interact"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:src="@drawable/circle_main_interact" />
+
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/icon_add"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:src="@drawable/icon_add" />
                 </FrameLayout>
+
                 <FrameLayout
+                    android:id="@+id/onModeConnect"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:id="@+id/onModeConnect" >
+                    android:layout_weight="1"
+                    android:gravity="center">
+
                     <ImageView
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@drawable/circle_main_interact"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:src="@drawable/circle_main_interact" />
+
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/icon_connect"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:src="@drawable/icon_connect" />
                 </FrameLayout>
+
                 <FrameLayout
+                    android:id="@+id/onModeDelete"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:id="@+id/onModeDelete" >
+                    android:layout_weight="1"
+                    android:gravity="center">
+
                     <ImageView
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:src="@drawable/circle_main_interact"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:src="@drawable/circle_main_interact" />
+
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/icon_delete"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:src="@drawable/icon_delete" />
                 </FrameLayout>
             </LinearLayout>
         </RelativeLayout>
-        <include layout="@layout/my_actionbar"/>
+
+        <include layout="@layout/my_actionbar" />
     </FrameLayout>
     <!-- The navigation drawer -->
     <LinearLayout
+        android:id="@+id/navigationDrawer"
         android:layout_width="200dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:layout_gravity="start"
-        android:background="#eee" >
+        android:background="#cfff"
+        android:orientation="vertical">
+
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/myToolbar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:orientation="vertical"
-            android:id="@+id/myToolbar">
+            android:orientation="vertical">
 
             <TextView
+                android:id="@+id/navbarTitle"
                 android:layout_width="200dp"
                 android:layout_height="55dp"
-                android:textSize="20sp"
-                android:text="Menu"
-                android:textColor="@color/white"
+                android:background="@drawable/toolbar_gradient"
                 android:gravity="center_vertical"
                 android:paddingLeft="20dp"
-                android:background="@drawable/toolbar_gradient"
-                android:id="@+id/navbarTitle" />
+                android:text="Menu"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -126,14 +137,14 @@
                     android:background="@drawable/toolbar_dropshadow" />
             </FrameLayout>
         </LinearLayout>
+
         <ListView
             android:id="@+id/left_drawer"
             android:layout_width="200dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:choiceMode="singleChoice"
-            android:divider="#ddd"
-            android:dividerHeight="2dp"
-            android:background="#eee"  />
+            android:divider="#ccc"
+            android:dividerHeight="1dp" />
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>
