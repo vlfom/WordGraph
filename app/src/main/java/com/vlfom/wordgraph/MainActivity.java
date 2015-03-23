@@ -22,6 +22,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Pair;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -50,9 +51,15 @@ public class MainActivity extends ActionBarActivity {
     final Integer
             NUMBER_NODE_TYPE = 1,
             TEXT_NODE_TYPE = 2;
+    final Integer
+            MODE_NONE = 0,
+            MODE_CREATE = 1,
+            MODE_CONNECT = 2,
+            MODE_REMOVE = 3 ;
     private final int
             node_diameter = 60,
             small_node_diameter = 40;
+    private int currentMode = MODE_NONE ;
     private final Handler handler = new Handler();
     private Integer number_nodes_counter = 0;
     private RelativeLayout mainLayout;
@@ -106,6 +113,16 @@ public class MainActivity extends ActionBarActivity {
         ((TextView) findViewById(R.id.actionbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
         ((TextView) findViewById(R.id.actionbarTitle)).setShadowLayer(2, 0, 1, Color.BLACK);
 
+        ((FrameLayout) findViewById(R.id.onModeCreate)).setOnTouchListener(
+                new ChangeModeListener()
+        );
+        ((FrameLayout) findViewById(R.id.onModeConnect)).setOnTouchListener(
+                new ChangeModeListener()
+        );
+        ((FrameLayout) findViewById(R.id.onModeDelete)).setOnTouchListener(
+                new ChangeModeListener()
+        );
+
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
@@ -156,45 +173,96 @@ public class MainActivity extends ActionBarActivity {
         initCanvas();
 
         mainLayout = (RelativeLayout) findViewById(R.id.layout_main);
+
         mainLayout.setOnTouchListener(
                 new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
-                        final Point touchPoint = new Point((int) event.getX(), (int) event.getY());
-                        mainLayout.getLocationOnScreen(mainDisplacement);
+                        float x = event.getRawX(), y = event.getRawY();
+                        if( (int)y - node_diameter < getSupportActionBar().getHeight() ||
+                                (int)y + node_diameter +
+                                        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 75, getResources().getDisplayMetrics()) >
+                                        getWindowManager().getDefaultDisplay().getHeight() )
+                            return false ;
+                        if( (int)x - node_diameter < 0 ||
+                                (int)x + node_diameter > getWindowManager().getDefaultDisplay().getWidth() )
+                            return false ;
 
-                        final RelativeLayout relativeLayout = new RelativeLayout(MainActivity.this);
-                        relativeLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                        relativeLayout.setPadding(10, 5, 10, 5);
-                        final EditText editText = new EditText(MainActivity.this);
-                        editText.setTextColor(Color.BLACK);
-                        editText.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                        relativeLayout.addView(editText);
+                        if( currentMode == MODE_CREATE ) {
+                            final Point touchPoint = new Point((int) event.getX(), (int) event.getY());
+                            mainLayout.getLocationOnScreen(mainDisplacement);
 
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("Enter vertex value:")
-                                .setView(relativeLayout)
-                                .setNegativeButton("Create text node", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        String enteredText = editText.getText().toString();
-                                        if (enteredText.equals(""))
-                                            enteredText = ".......";
+                            final RelativeLayout relativeLayout = new RelativeLayout(MainActivity.this);
+                            relativeLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                            relativeLayout.setPadding(10, 5, 10, 5);
+                            final EditText editText = new EditText(MainActivity.this);
+                            editText.setTextColor(Color.BLACK);
+                            editText.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                            relativeLayout.addView(editText);
 
-                                        addNewNode(touchPoint, enteredText, TEXT_NODE_TYPE, false);
-                                    }
-                                })
-                                .setPositiveButton("Create empty node", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        ++number_nodes_counter;
-                                        addNewNode(touchPoint, number_nodes_counter.toString(), NUMBER_NODE_TYPE, false);
-                                    }
-                                })
-                                .show();
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("Enter vertex value:")
+                                    .setView(relativeLayout)
+                                    .setNegativeButton("Create text node", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            String enteredText = editText.getText().toString();
+                                            if (enteredText.equals(""))
+                                                enteredText = ".......";
 
+                                            addNewNode(touchPoint, enteredText, TEXT_NODE_TYPE, false);
+                                        }
+                                    })
+                                    .setPositiveButton("Create empty node", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            ++number_nodes_counter;
+                                            addNewNode(touchPoint, number_nodes_counter.toString(), NUMBER_NODE_TYPE, false);
+                                        }
+                                    })
+                                    .show();
+                        }
                         return false;
                     }
                 }
         );
+    }
+
+    private class ChangeModeListener implements View.OnTouchListener {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+
+            ((FrameLayout) findViewById(R.id.onModeCreate)).setOnTouchListener(
+                    new ChangeModeListener()
+            );
+            ((FrameLayout) findViewById(R.id.onModeConnect)).setOnTouchListener(
+                    new ChangeModeListener()
+            );
+            ((FrameLayout) findViewById(R.id.onModeDelete)).setOnTouchListener(
+                    new ChangeModeListener()
+            );
+
+            if( (currentMode == MODE_NONE || currentMode == MODE_CREATE) &&
+                    v.getId() == R.id.onModeCreate ) {
+                if( currentMode == MODE_NONE ) {
+                    currentMode = MODE_CREATE;
+                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(0.5f) ;
+                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(0.5f) ;
+                }
+                else {
+                    currentMode = MODE_NONE;
+                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(1f) ;
+                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(1f) ;
+                }
+            }
+            else if( (currentMode == MODE_NONE || currentMode == MODE_CONNECT) &&
+                    v.getId() == R.id.onModeConnect ) {
+
+            }
+            else if( (currentMode == MODE_NONE || currentMode == MODE_REMOVE) &&
+                    v.getId() == R.id.onModeDelete ) {
+
+            }
+            return false;
+        }
     }
 
     private void addNewNode(Point nodePos, String nodeText, int nodeType, boolean addType) {
@@ -242,16 +310,6 @@ public class MainActivity extends ActionBarActivity {
                             }
                             break;
                             case MotionEvent.ACTION_MOVE: {
-//                                if (event.getRawY() - dy - Nodes.get(NodeIndex).getLayoutParams().height / 2 - getSupportActionBar().getHeight() <= 0)
-//                                    break;
-//                                Log.d("MY", getSupportActionBar().getHeight() + " " + layoutParams.topMargin + " " + (event.getRawY() + Nodes.get(NodeIndex).getLayoutParams().height / 2) + " " + getWindowManager().getDefaultDisplay().getHeight()) ;
-//                                if (event.getRawY() + Nodes.get(NodeIndex).getLayoutParams().height / 2 >= getWindowManager().getDefaultDisplay().getHeight())
-//                                    break;
-//                                if (event.getRawX() - dx - Nodes.get(NodeIndex).getLayoutParams().width / 2 <= 0)
-//                                    break;
-//                                if (event.getRawX() + dx + Nodes.get(NodeIndex).getLayoutParams().width / 2 >= getWindowManager().getDefaultDisplay().getWidth())
-//                                    break;
-
                                 if (vertexIndexFocused != -1)
                                     unsetFocusedVertex(vertexIndexFocused, vertexTypeFocused);
 
@@ -283,7 +341,7 @@ public class MainActivity extends ActionBarActivity {
                                     }
                                 } else {
                                     float x = event.getRawX(), y = event.getRawY();
-                                    if( (int)(y-dy) >= getSupportActionBar().getHeight() && (int)(y-dy) + v.getHeight() <= getWindowManager().getDefaultDisplay().getHeight() )
+                                    if( (int)(y-dy) >= getSupportActionBar().getHeight() && (int)(y-dy) + v.getHeight() + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 75, getResources().getDisplayMetrics()) <= getWindowManager().getDefaultDisplay().getHeight() )
                                         layoutParams.topMargin = (int) (y - dy);
                                     if( (int)(x-dx) >= 0 && (int)(x-dx) + v.getWidth() <= getWindowManager().getDefaultDisplay().getWidth() )
                                         layoutParams.leftMargin = (int) (x - dx);
