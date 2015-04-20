@@ -8,4 +8,10 @@
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
 
+    <string name="btnNewFile">New file</string>
+    <string name="btnOpenFile">Open file</string>
+    <string name="btnAbout">About</string>
+
+    <string name="text_about">Graph Viewer 1.0.0\nMade by Volodymyr Fomenko\n04.2015</string>
+    <string name="title_activity_about">About</string>
 </resources>

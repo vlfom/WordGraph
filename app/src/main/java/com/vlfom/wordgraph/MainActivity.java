@@ -1,6 +1,7 @@
 package com.vlfom.wordgraph;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
@@ -44,7 +45,6 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-
 
 public class MainActivity extends ActionBarActivity {
 
@@ -107,6 +107,8 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Fragment navbar = new Menu_FragmentList() ;
 
         ((TextView) findViewById(R.id.navbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
         ((TextView) findViewById(R.id.navbarTitle)).setShadowLayer(2, 0, 1, Color.BLACK);
@@ -314,8 +316,6 @@ public class MainActivity extends ActionBarActivity {
                                 }
 
                                 redrawCanvas();
-
-                                checkNodesCollision(NodeIndex);
                             }
                             break;
                             case MotionEvent.ACTION_UP: {
@@ -473,17 +473,6 @@ public class MainActivity extends ActionBarActivity {
         else
             ((ImageView) Nodes.get(vertexIndex).
                     findViewById(R.id.vertex_node)).setImageResource(R.drawable.text_vertex);
-    }
-
-    private void checkNodesCollision(final int NodeIndex) {
-        //Is it really necessary?
-        /*
-        for( FrameLayout Node : Nodes ) {
-            if( Node != Nodes.get(NodeIndex) && Math.abs( Node.getX()-Nodes.get(NodeIndex).getX() ) <= node_diameter ) {
-
-            }
-        }
-        */
     }
 
     @Override
