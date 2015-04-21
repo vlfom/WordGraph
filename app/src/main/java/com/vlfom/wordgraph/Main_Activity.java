@@ -108,12 +108,13 @@ public class Main_Activity extends ActionBarActivity {
         findViewById(R.id.onModeCreate).setOnTouchListener(
                 new ChangeModeListener()
         );
-        findViewById(R.id.onModeConnect).setOnTouchListener(
-                new ChangeModeListener()
-        );
         findViewById(R.id.onModeDelete).setOnTouchListener(
                 new ChangeModeListener()
         );
+        findViewById(R.id.onModeCancel).setOnTouchListener(
+                new ChangeModeListener()
+        );
+        findViewById(R.id.btns_cancel).setVisibility(View.INVISIBLE);
 
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -592,52 +593,16 @@ public class Main_Activity extends ActionBarActivity {
     private class ChangeModeListener implements View.OnTouchListener {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-
-            findViewById(R.id.onModeCreate).setOnTouchListener(
-                    new ChangeModeListener()
-            );
-            findViewById(R.id.onModeConnect).setOnTouchListener(
-                    new ChangeModeListener()
-            );
-            findViewById(R.id.onModeDelete).setOnTouchListener(
-                    new ChangeModeListener()
-            );
-
-            if ((currentMode == MODE_NONE || currentMode == MODE_CREATE) &&
-                    v.getId() == R.id.onModeCreate) {
-                if (currentMode == MODE_NONE) {
-                    currentMode = MODE_CREATE;
-                    findViewById(R.id.onModeConnect).setAlpha(0.5f);
-                    findViewById(R.id.onModeDelete).setAlpha(0.5f);
-                } else {
-                    currentMode = MODE_NONE;
-                    findViewById(R.id.onModeConnect).setAlpha(1f);
-                    findViewById(R.id.onModeDelete).setAlpha(1f);
+            if (currentMode != MODE_NONE) {
+                findViewById(R.id.btns_action).setVisibility(View.VISIBLE);
+                findViewById(R.id.btns_cancel).setVisibility(View.INVISIBLE);
+            } else {
+                findViewById(R.id.btns_action).setVisibility(View.INVISIBLE);
+                findViewById(R.id.btns_cancel).setVisibility(View.VISIBLE);
+                if (v.getId() == R.id.onModeCreate) {
                 }
-            } else if ((currentMode == MODE_NONE || currentMode == MODE_CONNECT) &&
-                    v.getId() == R.id.onModeConnect) {
-                if (currentMode == MODE_NONE) {
-                    currentMode = MODE_CONNECT;
-                    findViewById(R.id.onModeCreate).setAlpha(0.5f);
-                    findViewById(R.id.onModeDelete).setAlpha(0.5f);
-                } else {
-                    currentMode = MODE_NONE;
-                    findViewById(R.id.onModeCreate).setAlpha(1f);
-                    findViewById(R.id.onModeDelete).setAlpha(1f);
+                else if( v.getId() == R.id.onModeDelete ) {
                 }
-
-            } else if ((currentMode == MODE_NONE || currentMode == MODE_DELETE) &&
-                    v.getId() == R.id.onModeDelete) {
-                if (currentMode == MODE_NONE) {
-                    currentMode = MODE_DELETE;
-                    findViewById(R.id.onModeCreate).setAlpha(0.5f);
-                    findViewById(R.id.onModeConnect).setAlpha(0.5f);
-                } else {
-                    currentMode = MODE_NONE;
-                    findViewById(R.id.onModeCreate).setAlpha(1f);
-                    findViewById(R.id.onModeConnect).setAlpha(1f);
-                }
-
             }
             return false;
         }

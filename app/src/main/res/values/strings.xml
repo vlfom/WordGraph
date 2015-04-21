@@ -14,4 +14,6 @@
 
     <string name="text_about">Graph Viewer 1.0.0\nMade by Volodymyr Fomenko\n04.2015</string>
     <string name="title_activity_about">About</string>
+    <string name="bg_description">Main background</string>
+    <string name="display_description">Main display</string>
 </resources>
