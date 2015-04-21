@@ -1,7 +1,6 @@
 package com.vlfom.wordgraph;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
@@ -34,7 +33,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -93,13 +91,7 @@ public class Main_Activity extends ActionBarActivity {
             setFocusedVertex(vertexIndexPressed, vertexTypePressed, 1);
         }
     };
-    private String[] mScreenTitles;
-    private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
-    private String
-            mDrawerTitle,
-            mTitle;
     private Pair<Point, Point> tempLine = null;
     private ArrayList<Pair<Integer, Integer>> mSegments = new ArrayList<>();
 
@@ -113,13 +105,13 @@ public class Main_Activity extends ActionBarActivity {
         ((TextView) findViewById(R.id.actionbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
         ((TextView) findViewById(R.id.actionbarTitle)).setShadowLayer(2, 0, 1, Color.BLACK);
 
-        ((FrameLayout) findViewById(R.id.onModeCreate)).setOnTouchListener(
+        findViewById(R.id.onModeCreate).setOnTouchListener(
                 new ChangeModeListener()
         );
-        ((FrameLayout) findViewById(R.id.onModeConnect)).setOnTouchListener(
+        findViewById(R.id.onModeConnect).setOnTouchListener(
                 new ChangeModeListener()
         );
-        ((FrameLayout) findViewById(R.id.onModeDelete)).setOnTouchListener(
+        findViewById(R.id.onModeDelete).setOnTouchListener(
                 new ChangeModeListener()
         );
 
@@ -132,10 +124,9 @@ public class Main_Activity extends ActionBarActivity {
 
         drawBackground();
 
-        mTitle = mDrawerTitle = "Word Graph";
-        mScreenTitles = getResources().getStringArray(R.array.navbar_string_array);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        String[] mScreenTitles = getResources().getStringArray(R.array.navbar_string_array);
+        DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ListView mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         mDrawerList.setAdapter(new ArrayAdapter<>(this,
                 R.layout.navbar_list_item, mScreenTitles));
@@ -225,7 +216,7 @@ public class Main_Activity extends ActionBarActivity {
                 }
         );
 
-        ((LinearLayout) findViewById(R.id.navigationDrawer)).setAlpha(0.8f);
+        findViewById(R.id.navigationDrawer).setAlpha(0.8f);
     }
 
     private void addNewNode(Point nodePos, String nodeText, int nodeType, boolean addType) {
@@ -475,25 +466,13 @@ public class Main_Activity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Swaps fragments in the main content view
-     */
     private void selectItem(int position) {
-        // Highlight the selected item, update the title, and close the drawer
-//        mDrawerList.setItemChecked(position, true);
-//        setTitle(mScreenTitles[position]);
-//        mDrawerLayout.closeDrawer(mDrawerList);
         if (position == 0)
             setDefault();
         else if (position == 1)
@@ -510,22 +489,15 @@ public class Main_Activity extends ActionBarActivity {
         }, 1);
     }
 
-    /**
-     * When using the ActionBarDrawerToggle, you must call it during
-     * onPostCreate() and onConfigurationChanged()...
-     */
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
         mDrawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        // Pass any configuration change to the drawer toggles
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
@@ -621,13 +593,13 @@ public class Main_Activity extends ActionBarActivity {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
 
-            ((FrameLayout) findViewById(R.id.onModeCreate)).setOnTouchListener(
+            findViewById(R.id.onModeCreate).setOnTouchListener(
                     new ChangeModeListener()
             );
-            ((FrameLayout) findViewById(R.id.onModeConnect)).setOnTouchListener(
+            findViewById(R.id.onModeConnect).setOnTouchListener(
                     new ChangeModeListener()
             );
-            ((FrameLayout) findViewById(R.id.onModeDelete)).setOnTouchListener(
+            findViewById(R.id.onModeDelete).setOnTouchListener(
                     new ChangeModeListener()
             );
 
@@ -635,35 +607,35 @@ public class Main_Activity extends ActionBarActivity {
                     v.getId() == R.id.onModeCreate) {
                 if (currentMode == MODE_NONE) {
                     currentMode = MODE_CREATE;
-                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(0.5f);
-                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(0.5f);
+                    findViewById(R.id.onModeConnect).setAlpha(0.5f);
+                    findViewById(R.id.onModeDelete).setAlpha(0.5f);
                 } else {
                     currentMode = MODE_NONE;
-                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(1f);
-                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(1f);
+                    findViewById(R.id.onModeConnect).setAlpha(1f);
+                    findViewById(R.id.onModeDelete).setAlpha(1f);
                 }
             } else if ((currentMode == MODE_NONE || currentMode == MODE_CONNECT) &&
                     v.getId() == R.id.onModeConnect) {
                 if (currentMode == MODE_NONE) {
                     currentMode = MODE_CONNECT;
-                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(0.5f);
-                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(0.5f);
+                    findViewById(R.id.onModeCreate).setAlpha(0.5f);
+                    findViewById(R.id.onModeDelete).setAlpha(0.5f);
                 } else {
                     currentMode = MODE_NONE;
-                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(1f);
-                    ((FrameLayout) findViewById(R.id.onModeDelete)).setAlpha(1f);
+                    findViewById(R.id.onModeCreate).setAlpha(1f);
+                    findViewById(R.id.onModeDelete).setAlpha(1f);
                 }
 
             } else if ((currentMode == MODE_NONE || currentMode == MODE_DELETE) &&
                     v.getId() == R.id.onModeDelete) {
                 if (currentMode == MODE_NONE) {
                     currentMode = MODE_DELETE;
-                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(0.5f);
-                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(0.5f);
+                    findViewById(R.id.onModeCreate).setAlpha(0.5f);
+                    findViewById(R.id.onModeConnect).setAlpha(0.5f);
                 } else {
                     currentMode = MODE_NONE;
-                    ((FrameLayout) findViewById(R.id.onModeCreate)).setAlpha(1f);
-                    ((FrameLayout) findViewById(R.id.onModeConnect)).setAlpha(1f);
+                    findViewById(R.id.onModeCreate).setAlpha(1f);
+                    findViewById(R.id.onModeConnect).setAlpha(1f);
                 }
 
             }
