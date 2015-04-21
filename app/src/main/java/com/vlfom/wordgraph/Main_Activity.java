@@ -46,7 +46,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-public class MainActivity extends ActionBarActivity {
+public class Main_Activity extends ActionBarActivity {
 
     final Integer
             NUMBER_NODE_TYPE = 1,
@@ -107,8 +107,6 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Fragment navbar = new Menu_FragmentList() ;
 
         ((TextView) findViewById(R.id.navbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
         ((TextView) findViewById(R.id.navbarTitle)).setShadowLayer(2, 0, 1, Color.BLACK);
@@ -194,15 +192,15 @@ public class MainActivity extends ActionBarActivity {
                             final Point touchPoint = new Point((int) event.getX(), (int) event.getY());
                             mainLayout.getLocationOnScreen(mainDisplacement);
 
-                            final RelativeLayout relativeLayout = new RelativeLayout(MainActivity.this);
+                            final RelativeLayout relativeLayout = new RelativeLayout(Main_Activity.this);
                             relativeLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                             relativeLayout.setPadding(10, 5, 10, 5);
-                            final EditText editText = new EditText(MainActivity.this);
+                            final EditText editText = new EditText(Main_Activity.this);
                             editText.setTextColor(Color.BLACK);
                             editText.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                             relativeLayout.addView(editText);
 
-                            new AlertDialog.Builder(MainActivity.this)
+                            new AlertDialog.Builder(Main_Activity.this)
                                     .setTitle("Enter vertex value:")
                                     .setView(relativeLayout)
                                     .setNegativeButton("Create text node", new DialogInterface.OnClickListener() {

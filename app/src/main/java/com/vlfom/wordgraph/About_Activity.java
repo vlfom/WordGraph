@@ -3,7 +3,7 @@ package com.vlfom.wordgraph;
 import android.app.Activity;
 import android.os.Bundle;
 
-public class AboutActivity extends Activity {
+public class About_Activity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
