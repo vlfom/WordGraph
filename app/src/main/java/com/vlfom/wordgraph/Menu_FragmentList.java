@@ -3,6 +3,7 @@ package com.vlfom.wordgraph;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,8 +32,15 @@ public class Menu_FragmentList extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (view.getId() == R.id.btnNew)
                     startActivity(new Intent(getActivity(), Main_Activity.class));
-                else if (view.getId() == R.id.btnOpen)
+                else if (view.getId() == R.id.btnOpen) {
+//                    if (show) {
+//                        popupWindow.showAtLocation(popupMenuView, Gravity.TOP, 0, 10);
+//                        popupWindow.update((int) Math.round(screenWidth * 0.8), (int) Math.round(screenHeight * 0.85));
+//                    } else
+//                        popupWindow.dismiss();
+//                    show = !show;
                     startActivity(new Intent(getActivity(), About_Activity.class));
+                }
                 else if (view.getId() == R.id.btnAbout)
                     startActivity(new Intent(getActivity(), About_Activity.class));
             }

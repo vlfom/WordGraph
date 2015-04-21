@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,6 +13,7 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -22,6 +24,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Pair;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -34,8 +37,11 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -94,6 +100,9 @@ public class Main_Activity extends ActionBarActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private Pair<Point, Point> tempLine = null;
     private ArrayList<Pair<Integer, Integer>> mSegments = new ArrayList<>();
+
+    final Uri FILELIST_URI = Uri
+            .parse("content://" + FileList_Provider.AUTHORITY + "/" + FileList_Provider.FILES_PATH);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -588,6 +597,47 @@ public class Main_Activity extends ActionBarActivity {
             objectOutputStream.close();
         } catch (Exception ex) {
         }
+    }
+
+
+    View popupMenuView ; PopupWindow popupWindow ; TextView popupTextTitle, popupTextDescription ; ImageView popupImage ;
+
+    private void prepareFileList() {
+        popupMenuView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).
+                inflate(R.layout.fileopen_layout, ((RelativeLayout) this.findViewById(R.id.fileopen_layout))) ;
+        popupWindow = new PopupWindow(popupMenuView) ;
+
+        Cursor cursor = getContentResolver().query(FILELIST_URI, null, null,
+                null, null);
+        startManagingCursor(cursor);
+
+        String from[] = {
+                FileList_Provider.FILE_NAME,
+                FileList_Provider.FILE_FULL
+        };
+        int to[] = { android.R.id.text1, android.R.id.text2 };
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+                android.R.layout.simple_list_item_1, cursor, from, to);
+
+
+        ((ListView) popupMenuView.findViewById(R.id.fileopen_popuplist)).setAdapter(adapter) ;
+        ((ListView) popupMenuView.findViewById(R.id.fileopen_popuplist)).setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> listView, View view,
+                                            int position, long id) {
+                        // Get the cursor, positioned to the corresponding row in the result set
+                        Cursor cursor = (Cursor) listView.getItemAtPosition(position);
+
+                        // Get the state's capital from this row in the database.
+                        String something =
+                                cursor.getString(cursor.getColumnIndexOrThrow(FileList_Provider.FILE_FULL));
+                        Toast.makeText(getApplicationContext(),
+                                something, Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+        );
     }
 
     private class ChangeModeListener implements View.OnTouchListener {
