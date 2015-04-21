@@ -36,6 +36,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Menu_Activity" />
         </activity>
+
+        <provider
+            android:name=".FileList_Provider"
+            android:authorities="com.vlfom.providers.FileList">
+        </provider>
     </application>
 
 </manifest>

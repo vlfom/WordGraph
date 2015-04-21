@@ -32,6 +32,9 @@ public class FileList_Provider extends ContentProvider {
 
     static final String FILES_PATH = "files";
 
+    static final Uri FILELIST_URI = Uri
+            .parse("content://" + FileList_Provider.AUTHORITY + "/" + FileList_Provider.FILES_PATH);
+
     public static final Uri CONTACT_CONTENT_URI = Uri.parse("content://"
             + AUTHORITY + "/" + FILES_PATH);
 

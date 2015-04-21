@@ -22,6 +22,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -101,9 +102,6 @@ public class Main_Activity extends ActionBarActivity {
     private Pair<Point, Point> tempLine = null;
     private ArrayList<Pair<Integer, Integer>> mSegments = new ArrayList<>();
 
-    final Uri FILELIST_URI = Uri
-            .parse("content://" + FileList_Provider.AUTHORITY + "/" + FileList_Provider.FILES_PATH);
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,7 +121,7 @@ public class Main_Activity extends ActionBarActivity {
         findViewById(R.id.onModeCancel).setOnTouchListener(
                 new ChangeModeListener()
         );
-        findViewById(R.id.btns_cancel).setVisibility(View.INVISIBLE);
+        findViewById(R.id.btns_cancel).setVisibility(View.GONE);
 
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -599,59 +597,26 @@ public class Main_Activity extends ActionBarActivity {
         }
     }
 
-
-    View popupMenuView ; PopupWindow popupWindow ; TextView popupTextTitle, popupTextDescription ; ImageView popupImage ;
-
-    private void prepareFileList() {
-        popupMenuView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).
-                inflate(R.layout.fileopen_layout, ((RelativeLayout) this.findViewById(R.id.fileopen_layout))) ;
-        popupWindow = new PopupWindow(popupMenuView) ;
-
-        Cursor cursor = getContentResolver().query(FILELIST_URI, null, null,
-                null, null);
-        startManagingCursor(cursor);
-
-        String from[] = {
-                FileList_Provider.FILE_NAME,
-                FileList_Provider.FILE_FULL
-        };
-        int to[] = { android.R.id.text1, android.R.id.text2 };
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_list_item_1, cursor, from, to);
-
-
-        ((ListView) popupMenuView.findViewById(R.id.fileopen_popuplist)).setAdapter(adapter) ;
-        ((ListView) popupMenuView.findViewById(R.id.fileopen_popuplist)).setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> listView, View view,
-                                            int position, long id) {
-                        // Get the cursor, positioned to the corresponding row in the result set
-                        Cursor cursor = (Cursor) listView.getItemAtPosition(position);
-
-                        // Get the state's capital from this row in the database.
-                        String something =
-                                cursor.getString(cursor.getColumnIndexOrThrow(FileList_Provider.FILE_FULL));
-                        Toast.makeText(getApplicationContext(),
-                                something, Toast.LENGTH_SHORT).show();
-
-                    }
-                }
-        );
-    }
-
+    private long lastActionTime = 0 ;
     private class ChangeModeListener implements View.OnTouchListener {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+            long curActionTime = System.currentTimeMillis() ;
+            if( curActionTime - lastActionTime < 1000 )
+                return false ;
+            lastActionTime = curActionTime ;
             if (currentMode != MODE_NONE) {
                 findViewById(R.id.btns_action).setVisibility(View.VISIBLE);
-                findViewById(R.id.btns_cancel).setVisibility(View.INVISIBLE);
+                findViewById(R.id.btns_cancel).setVisibility(View.GONE);
+                currentMode = MODE_NONE ;
             } else {
-                findViewById(R.id.btns_action).setVisibility(View.INVISIBLE);
+                findViewById(R.id.btns_action).setVisibility(View.GONE);
                 findViewById(R.id.btns_cancel).setVisibility(View.VISIBLE);
                 if (v.getId() == R.id.onModeCreate) {
+                    currentMode = MODE_CREATE ;
                 }
                 else if( v.getId() == R.id.onModeDelete ) {
+                    currentMode = MODE_DELETE ;
                 }
             }
             return false;

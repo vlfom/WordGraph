@@ -101,7 +101,7 @@
                         android:background="@drawable/mode_bar_cancel"
                         android:text="Cancel"
                         android:textColor="#225"
-                        android:textSize="24dp"
+                        android:textSize="18dp"
                         android:gravity="center"
                         android:id="@+id/onModeCancel"/>
 
