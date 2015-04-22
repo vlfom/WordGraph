@@ -258,7 +258,6 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
         frameLayout.setOnTouchListener(
                 new View.OnTouchListener() {
                     private final FrameLayout thisLayout = frameLayout ;
-                    private final int NodeIndex = Nodes.size();
                     private final float BOUNDARY_MOVE = 10;
                     RelativeLayout.LayoutParams layoutParams;
                     RelativeLayout.LayoutParams mParams;
@@ -272,7 +271,7 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
 
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
-
+                        int NodeIndex = Nodes.indexOf(thisLayout) ;
                         if( currentMode == MODE_NONE ) {
                             switch (event.getAction()) {
                                 case MotionEvent.ACTION_DOWN: {
@@ -369,7 +368,6 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                         }
                         else if( currentMode == MODE_DELETE ) {
                             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
                                 NodesInfo.remove(NodeIndex) ;
                                 NodesPos.remove(NodeIndex) ;
                                 for( int i = 0 ; i < number_nodes_counter ; ++i )
@@ -402,6 +400,13 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
 
                                 Nodes.remove(thisLayout);
                                 mainLayout.removeView(thisLayout);
+
+                                (new Handler()).postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        redrawCanvas();
+                                    }
+                                }, 1);
                             }
                         }
                         return true;
