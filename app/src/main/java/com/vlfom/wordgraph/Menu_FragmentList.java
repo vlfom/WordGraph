@@ -92,8 +92,8 @@ public class Menu_FragmentList extends Fragment {
                     startActivity(new Intent(getActivity(), Main_Activity.class));
                 else if (view.getId() == R.id.btnOpen) {
                     if( !popupVisible ) {
-                        popupWindow.showAtLocation(popupListView, Gravity.TOP, 0, 10);
-                        popupWindow.update((int) Math.round(screenWidth * 0.8), (int) Math.round(screenHeight * 0.85));
+                        popupWindow.showAtLocation(popupListView, Gravity.TOP, 0, (int) Math.round(screenHeight * 0.025));
+                        popupWindow.update((int) Math.round(screenWidth * 0.95), (int) Math.round(screenHeight * 0.95));
                     }
                     else
                         popupWindow.dismiss() ;
