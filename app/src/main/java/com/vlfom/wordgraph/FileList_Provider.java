@@ -59,24 +59,20 @@ public class FileList_Provider extends ContentProvider {
     SQLiteDatabase db;
 
     public boolean onCreate() {
-        Log.d(LOG_TAG, "onCreate");
         dbHelper = new DBHelper(getContext());
         return true;
     }
 
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        Log.d(LOG_TAG, "query, " + uri.toString());
         switch (uriMatcher.match(uri)) {
             case URI_CONTACTS:
-                Log.d(LOG_TAG, "URI_CONTACTS");
                 if (TextUtils.isEmpty(sortOrder)) {
                     sortOrder = FILE_NAME + " ASC";
                 }
                 break;
             case URI_CONTACTS_ID:
                 String id = uri.getLastPathSegment();
-                Log.d(LOG_TAG, "URI_CONTACTS_ID, " + id);
                 if (TextUtils.isEmpty(selection)) {
                     selection = FILE_ID + " = " + id;
                 } else {

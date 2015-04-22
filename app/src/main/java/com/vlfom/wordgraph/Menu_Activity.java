@@ -27,8 +27,11 @@ public class Menu_Activity extends Activity implements DataReceiver {
         @Override
         public boolean onTouch(View view, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (view.getId() == R.id.btnNew)
-                    startActivity(new Intent(Menu_Activity.this, Main_Activity.class));
+                if (view.getId() == R.id.btnNew) {
+                    Intent intent = new Intent(Menu_Activity.this, Main_Activity.class) ;
+                    intent.putExtra("file", "null") ;
+                    startActivity(intent);
+                }
                 else if (view.getId() == R.id.btnOpen) {
                     FragmentManager fragmentManager = getFragmentManager();
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

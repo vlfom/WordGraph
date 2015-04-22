@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -25,6 +26,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -41,6 +43,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -226,11 +229,19 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
 
         findViewById(R.id.navigationDrawer).setAlpha(0.8f);
 
-        Intent thisIntent = getIntent() ;
-        if( thisIntent.hasExtra("file") )
-            receiveFileName(thisIntent.getStringExtra("file"));
-        else
+        String receiveName = getIntent().getStringExtra("file") ;
+        if( receiveName.equals("null") )
             fileName = null ;
+        else {
+            fileName = receiveName;
+            loadFile(fileName);
+            (new Handler()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    redrawCanvas();
+                }
+            }, 1);
+        }
     }
 
     private void addNewNode(Point nodePos, String nodeText, int nodeType, boolean addType) {
@@ -246,6 +257,7 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
 
         frameLayout.setOnTouchListener(
                 new View.OnTouchListener() {
+                    private final FrameLayout thisLayout = frameLayout ;
                     private final int NodeIndex = Nodes.size();
                     private final float BOUNDARY_MOVE = 10;
                     RelativeLayout.LayoutParams layoutParams;
@@ -260,99 +272,137 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
 
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
-                        if( currentMode != MODE_NONE )
-                            return true ;
-                        switch (event.getAction()) {
-                            case MotionEvent.ACTION_DOWN: {
-                                layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();
-                                dx = event.getRawX() - layoutParams.leftMargin;
-                                dy = event.getRawY() - layoutParams.topMargin;
 
-                                if (vertexPressed == 0) {
-                                    sX = event.getRawX();
-                                    sY = event.getRawY();
-                                    handler.postDelayed(checkLongTouch, 500);
-                                    vertexPressed = 1;
-                                }
+                        if( currentMode == MODE_NONE ) {
+                            switch (event.getAction()) {
+                                case MotionEvent.ACTION_DOWN: {
+                                    layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();
+                                    dx = event.getRawX() - layoutParams.leftMargin;
+                                    dy = event.getRawY() - layoutParams.topMargin;
 
-                                vertexIndexPressed = NodeIndex;
-                                vertexTypePressed = NodesInfo.get(NodeIndex).second;
-                            }
-                            break;
-                            case MotionEvent.ACTION_MOVE: {
-                                if (vertexIndexFocused != -1)
-                                    unsetFocusedVertex(vertexIndexFocused, vertexTypeFocused);
-
-                                if (vertexPressed == 1 && Math.sqrt(
-                                        Math.pow(event.getRawX() - sX, 2) +
-                                                Math.pow(event.getRawY() - sY, 2)) > BOUNDARY_MOVE) {
-                                    vertexPressed = 0;
-                                    handler.removeCallbacks(checkLongTouch);
-                                } else if (vertexPressed == 2) {
-                                    RelativeLayout.LayoutParams
-                                            mParams = (RelativeLayout.LayoutParams) Nodes.get(NodeIndex).getLayoutParams();
-                                    tempLine = new Pair<>(
-                                            new Point(mParams.leftMargin + Nodes.get(NodeIndex).getWidth() / 2, mParams.topMargin + Nodes.get(NodeIndex).getHeight() / 2),
-                                            new Point((int) event.getRawX() - mainDisplacement[0], (int) event.getRawY() - mainDisplacement[1])
-                                    );
-
-                                    int foundNode = -1;
-                                    for (int i = 0; i < Nodes.size(); ++i)
-                                        if (i != NodeIndex && !Edges.get(NodeIndex).contains(i)) {
-                                            if (checkNodeIntersection(i, new Point((int) event.getRawX(), (int) event.getRawY()))) {
-                                                foundNode = i;
-                                                break;
-                                            }
-                                        }
-                                    if (foundNode != -1) {
-                                        vertexIndexFocused = foundNode;
-                                        vertexTypeFocused = NodesInfo.get(foundNode).second;
-                                        setFocusedVertex(vertexIndexFocused, vertexTypeFocused, 2);
+                                    if (vertexPressed == 0) {
+                                        sX = event.getRawX();
+                                        sY = event.getRawY();
+                                        handler.postDelayed(checkLongTouch, 500);
+                                        vertexPressed = 1;
                                     }
-                                } else {
-                                    float x = event.getRawX(), y = event.getRawY();
-                                    if ((int) (y - dy) >= getSupportActionBar().getHeight() && (int) (y - dy) + v.getHeight() + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 75, getResources().getDisplayMetrics()) <= getWindowManager().getDefaultDisplay().getHeight())
-                                        layoutParams.topMargin = (int) (y - dy);
-                                    if ((int) (x - dx) >= 0 && (int) (x - dx) + v.getWidth() <= getWindowManager().getDefaultDisplay().getWidth())
-                                        layoutParams.leftMargin = (int) (x - dx);
-                                    v.setLayoutParams(layoutParams);
 
-                                    NodesPos.set(NodeIndex, new Point((int) (x - dx), (int) (y - dy)));
+                                    vertexIndexPressed = NodeIndex;
+                                    vertexTypePressed = NodesInfo.get(NodeIndex).second;
                                 }
+                                break;
+                                case MotionEvent.ACTION_MOVE: {
+                                    if (vertexIndexFocused != -1)
+                                        unsetFocusedVertex(vertexIndexFocused, vertexTypeFocused);
 
-                                redrawCanvas();
-                            }
-                            break;
-                            case MotionEvent.ACTION_UP: {
-                                if (vertexIndexFocused != -1)
-                                    unsetFocusedVertex(vertexIndexFocused, vertexTypeFocused);
-                                if (vertexPressed == 2) {
-                                    unsetFocusedVertex(vertexIndexPressed, vertexTypePressed);
+                                    if (vertexPressed == 1 && Math.sqrt(
+                                            Math.pow(event.getRawX() - sX, 2) +
+                                                    Math.pow(event.getRawY() - sY, 2)) > BOUNDARY_MOVE) {
+                                        vertexPressed = 0;
+                                        handler.removeCallbacks(checkLongTouch);
+                                    } else if (vertexPressed == 2) {
+                                        RelativeLayout.LayoutParams
+                                                mParams = (RelativeLayout.LayoutParams) Nodes.get(NodeIndex).getLayoutParams();
+                                        tempLine = new Pair<>(
+                                                new Point(mParams.leftMargin + Nodes.get(NodeIndex).getWidth() / 2, mParams.topMargin + Nodes.get(NodeIndex).getHeight() / 2),
+                                                new Point((int) event.getRawX() - mainDisplacement[0], (int) event.getRawY() - mainDisplacement[1])
+                                        );
 
-                                    int foundNode = -1;
-                                    for (int i = 0; i < Nodes.size(); ++i)
-                                        if (i != NodeIndex && !Edges.get(NodeIndex).contains(i)) {
-                                            mParams = (RelativeLayout.LayoutParams) Nodes.get(i).getLayoutParams();
-                                            if (checkNodeIntersection(i, new Point((int) event.getRawX(), (int) event.getRawY()))) {
-                                                foundNode = i;
-                                                break;
+                                        int foundNode = -1;
+                                        for (int i = 0; i < Nodes.size(); ++i)
+                                            if (i != NodeIndex && !Edges.get(NodeIndex).contains(i)) {
+                                                if (checkNodeIntersection(i, new Point((int) event.getRawX(), (int) event.getRawY()))) {
+                                                    foundNode = i;
+                                                    break;
+                                                }
                                             }
+                                        if (foundNode != -1) {
+                                            vertexIndexFocused = foundNode;
+                                            vertexTypeFocused = NodesInfo.get(foundNode).second;
+                                            setFocusedVertex(vertexIndexFocused, vertexTypeFocused, 2);
                                         }
-                                    if (foundNode != -1) {
-                                        mSegments.add(new Pair<>(NodeIndex, foundNode));
-                                        Edges.get(NodeIndex).add(foundNode);
-                                        Edges.get(foundNode).add(NodeIndex);
+                                    } else {
+                                        float x = event.getRawX(), y = event.getRawY();
+                                        if ((int) (y - dy) >= getSupportActionBar().getHeight() && (int) (y - dy) + v.getHeight() + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 75, getResources().getDisplayMetrics()) <= getWindowManager().getDefaultDisplay().getHeight())
+                                            layoutParams.topMargin = (int) (y - dy);
+                                        if ((int) (x - dx) >= 0 && (int) (x - dx) + v.getWidth() <= getWindowManager().getDefaultDisplay().getWidth())
+                                            layoutParams.leftMargin = (int) (x - dx);
+                                        v.setLayoutParams(layoutParams);
+
+                                        NodesPos.set(NodeIndex, new Point((int) (x - dx), (int) (y - dy)));
                                     }
-                                    tempLine = null;
 
                                     redrawCanvas();
                                 }
+                                break;
+                                case MotionEvent.ACTION_UP: {
+                                    if (vertexIndexFocused != -1)
+                                        unsetFocusedVertex(vertexIndexFocused, vertexTypeFocused);
+                                    if (vertexPressed == 2) {
+                                        unsetFocusedVertex(vertexIndexPressed, vertexTypePressed);
 
-                                vertexPressed = 0;
-                                vertexIndexFocused = -1;
-                                handler.removeCallbacks(checkLongTouch);
+                                        int foundNode = -1;
+                                        for (int i = 0; i < Nodes.size(); ++i)
+                                            if (i != NodeIndex && !Edges.get(NodeIndex).contains(i)) {
+                                                mParams = (RelativeLayout.LayoutParams) Nodes.get(i).getLayoutParams();
+                                                if (checkNodeIntersection(i, new Point((int) event.getRawX(), (int) event.getRawY()))) {
+                                                    foundNode = i;
+                                                    break;
+                                                }
+                                            }
+                                        if (foundNode != -1) {
+                                            mSegments.add(new Pair<>(NodeIndex, foundNode));
+                                            Edges.get(NodeIndex).add(foundNode);
+                                            Edges.get(foundNode).add(NodeIndex);
+                                        }
+                                        tempLine = null;
+
+                                        redrawCanvas();
+                                    }
+
+                                    vertexPressed = 0;
+                                    vertexIndexFocused = -1;
+                                    handler.removeCallbacks(checkLongTouch);
+                                }
+                                break;
                             }
-                            break;
+                        }
+                        else if( currentMode == MODE_DELETE ) {
+                            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+
+                                NodesInfo.remove(NodeIndex) ;
+                                NodesPos.remove(NodeIndex) ;
+                                for( int i = 0 ; i < number_nodes_counter ; ++i )
+                                    for( int j = Edges.get(i).size()-1 ; j >= 0 ; --j )
+                                        if( Edges.get(i).get(j) == NodeIndex )
+                                            Edges.get(i).remove(j) ;
+                                        else if( Edges.get(i).get(j) > NodeIndex )
+                                            Edges.get(i).set( j, Edges.get(i).get(j)-1 ) ;
+                                Edges.remove(NodeIndex) ;
+                                for( int i = mSegments.size()-1 ; i >= 0 ; --i ) {
+                                    if (mSegments.get(i).first == NodeIndex) {
+                                        mSegments.remove(i);
+                                        continue;
+                                    }
+                                    if (mSegments.get(i).second == NodeIndex) {
+                                        mSegments.remove(i);
+                                        continue;
+                                    }
+                                    if( mSegments.get(i).first > NodeIndex )
+                                        mSegments.set(i,
+                                                new Pair<>(mSegments.get(i).first-1,mSegments.get(i).second)
+                                        ) ;
+                                    if( mSegments.get(i).second > NodeIndex )
+                                        mSegments.set(i,
+                                                new Pair<>(mSegments.get(i).first, mSegments.get(i).second-1)
+                                        ) ;
+                                }
+
+                                --number_nodes_counter ;
+
+                                Nodes.remove(thisLayout);
+                                mainLayout.removeView(thisLayout);
+                            }
                         }
                         return true;
                     }
@@ -489,8 +539,10 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
     }
 
     private void selectItem(int position) {
-        if (position == 0)
+        if (position == 0) {
+            fileName = null ;
             setDefault();
+        }
         else if (position == 1) {
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -514,11 +566,25 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                         .setNegativeButton("Save file", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String enteredText = editText.getText().toString();
-                                ContentValues contentValues = new ContentValues();
-                                contentValues.put(FileList_Provider.FILE_NAME, enteredText);
-                                contentValues.put(FileList_Provider.FILE_FULL, enteredText + ".wg");
-                                getContentResolver().insert(FileList_Provider.FILELIST_URI, contentValues);
-                                saveFile(enteredText + ".wg");
+                                Cursor cursor = getContentResolver().query(
+                                        FileList_Provider.FILELIST_URI,
+                                        null,
+                                        FileList_Provider.FILE_NAME + "=?",
+                                        new String[]{
+                                                enteredText
+                                        },
+                                        null);
+                                if( !cursor.moveToFirst() || cursor.getCount() == 0 ) {
+                                    fileName = enteredText ;
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put(FileList_Provider.FILE_NAME, fileName);
+                                    contentValues.put(FileList_Provider.FILE_FULL, fileName + ".wg");
+                                    getContentResolver().insert(FileList_Provider.FILELIST_URI, contentValues);
+                                    saveFile(fileName + ".wg");
+                                }
+                                else
+                                    Toast.makeText(getApplicationContext(), "File with such name already exists!", Toast.LENGTH_SHORT).show() ;
+                                cursor.close() ;
                             }
                         })
                         .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
@@ -527,8 +593,24 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                         })
                         .show();
             }
-            else
-                saveFile( fileName ) ;
+            else {
+                Cursor cursor = getContentResolver().query(
+                        FileList_Provider.FILELIST_URI,
+                        null,
+                        FileList_Provider.FILE_NAME + "=?",
+                        new String[]{
+                                fileName
+                        },
+                        null);
+                if( !cursor.moveToFirst() || cursor.getCount() == 0 ) {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(FileList_Provider.FILE_NAME, fileName);
+                    contentValues.put(FileList_Provider.FILE_FULL, fileName + ".wg");
+                    getContentResolver().insert(FileList_Provider.FILELIST_URI, contentValues);
+                }
+                cursor.close() ;
+                saveFile(fileName);
+            }
         }
         else if (position == 3)
             setDefault();

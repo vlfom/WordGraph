@@ -1,7 +1,10 @@
 package com.vlfom.wordgraph;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -66,11 +69,25 @@ public class Menu_FragmentList extends Fragment {
                 new AdapterView.OnItemLongClickListener() {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                        Cursor cursor = (Cursor) parent.getItemAtPosition(position);
-                        ((DataReceiver) getActivity()).receiveFileName(
-                                cursor.getString(cursor.getColumnIndexOrThrow(FileList_Provider.FILE_FULL))
-                        );
-                        getActivity().getFragmentManager().beginTransaction().remove(thisFragment).commit();
+                        final Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                        new AlertDialog.Builder(getActivity())
+                                .setTitle("Are you sure want to delete this file?")
+                                .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        getActivity().getContentResolver().delete(
+                                                FileList_Provider.FILELIST_URI,
+                                                FileList_Provider.FILE_FULL + "=?",
+                                                new String[]{
+                                                        cursor.getString(cursor.getColumnIndexOrThrow(FileList_Provider.FILE_FULL))
+                                                });
+                                    }
+                                })
+                                .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                    }
+                                })
+                                .show();
+                        return true ;
                     }
                 }
         );
