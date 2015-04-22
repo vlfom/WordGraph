@@ -5,4 +5,46 @@
     android:id="@+id/menu_layout"
     android:background="@drawable/main_bg">
 
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
+        <Button
+            android:id="@+id/btnNew"
+            android:text="@string/btnNewFile"
+            android:layout_above="@+id/btnOpen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:textSize="18sp"
+            android:padding="10dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/button_menu" />
+
+        <Button
+            android:id="@+id/btnOpen"
+            android:text="@string/btnOpenFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:textSize="18sp"
+            android:padding="10dp"
+            android:background="@drawable/button_menu" />
+
+        <Button
+            android:id="@+id/btnAbout"
+            android:text="@string/btnAbout"
+            android:layout_below="@+id/btnOpen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:textSize="18sp"
+            android:padding="10dp"
+            android:background="@drawable/button_menu"
+            android:layout_marginTop="2dp" />
+    </LinearLayout>
+
 </RelativeLayout>

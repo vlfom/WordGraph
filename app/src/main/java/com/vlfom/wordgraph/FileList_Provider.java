@@ -15,7 +15,7 @@ import android.util.Log;
 public class FileList_Provider extends ContentProvider {
     final String LOG_TAG = "myLogs";
 
-    static final String DB_NAME = "mydb";
+    static final String DB_NAME = "filedb";
     static final int DB_VERSION = 1;
 
     static final String FILE_TABLE = "files";
@@ -95,7 +95,6 @@ public class FileList_Provider extends ContentProvider {
     }
 
     public Uri insert(Uri uri, ContentValues values) {
-        Log.d(LOG_TAG, "insert, " + uri.toString());
         if (uriMatcher.match(uri) != URI_CONTACTS)
             throw new IllegalArgumentException("Wrong URI: " + uri);
 
@@ -107,14 +106,11 @@ public class FileList_Provider extends ContentProvider {
     }
 
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        Log.d(LOG_TAG, "delete, " + uri.toString());
         switch (uriMatcher.match(uri)) {
             case URI_CONTACTS:
-                Log.d(LOG_TAG, "URI_CONTACTS");
                 break;
             case URI_CONTACTS_ID:
                 String id = uri.getLastPathSegment();
-                Log.d(LOG_TAG, "URI_CONTACTS_ID, " + id);
                 if (TextUtils.isEmpty(selection)) {
                     selection = FILE_ID + " = " + id;
                 } else {
@@ -132,15 +128,11 @@ public class FileList_Provider extends ContentProvider {
 
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
-        Log.d(LOG_TAG, "update, " + uri.toString());
         switch (uriMatcher.match(uri)) {
             case URI_CONTACTS:
-                Log.d(LOG_TAG, "URI_CONTACTS");
-
                 break;
             case URI_CONTACTS_ID:
                 String id = uri.getLastPathSegment();
-                Log.d(LOG_TAG, "URI_CONTACTS_ID, " + id);
                 if (TextUtils.isEmpty(selection)) {
                     selection = FILE_ID + " = " + id;
                 } else {
@@ -157,7 +149,6 @@ public class FileList_Provider extends ContentProvider {
     }
 
     public String getType(Uri uri) {
-        Log.d(LOG_TAG, "getType, " + uri.toString());
         switch (uriMatcher.match(uri)) {
             case URI_CONTACTS:
                 return CONTACT_CONTENT_TYPE;

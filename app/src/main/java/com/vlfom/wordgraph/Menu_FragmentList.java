@@ -2,11 +2,9 @@ package com.vlfom.wordgraph;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,39 +14,23 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SimpleCursorAdapter;
-import android.widget.Toast;
 
 public class Menu_FragmentList extends Fragment {
     private int
             screenHeight,
             screenWidth ;
+    View popupListView; PopupWindow popupWindow ;
+    Fragment thisFragment ;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_menulist,
-                container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         screenWidth = displayMetrics.widthPixels;
         screenHeight = displayMetrics.heightPixels;
 
-        getActivity().findViewById(R.id.btnNew).setOnTouchListener(new myTouchListener());
-        getActivity().findViewById(R.id.btnOpen).setOnTouchListener(new myTouchListener());
-        getActivity().findViewById(R.id.btnAbout).setOnTouchListener(new myTouchListener());
-
-        prepareFileList();
-    }
-
-    View popupListView; PopupWindow popupWindow ;
-
-    private void prepareFileList() {
         popupListView = ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).
                 inflate(R.layout.fileopen_layout, ((RelativeLayout) getActivity().findViewById(R.id.fileopen_layout))) ;
         popupWindow = new PopupWindow(popupListView) ;
@@ -65,45 +47,56 @@ public class Menu_FragmentList extends Fragment {
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.simple_list_item_1, cursor, from, to);
 
+        thisFragment = this ;
         ((ListView) popupListView.findViewById(R.id.fileopen_popuplist)).setAdapter(adapter) ;
         ((ListView) popupListView.findViewById(R.id.fileopen_popuplist)).setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
                     @Override
-                    public void onItemClick(AdapterView<?> listView, View view,
+                    public void onItemClick(AdapterView<?> parent, View view,
                                             int position, long id) {
-                        Cursor cursor = (Cursor) listView.getItemAtPosition(position);
-
-                        String something =
-                                cursor.getString(cursor.getColumnIndexOrThrow(FileList_Provider.FILE_FULL));
-                        Toast.makeText(getActivity().getApplicationContext(),
-                                something, Toast.LENGTH_SHORT).show();
-
+                        Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                        ((DataReceiver) getActivity()).receiveFileName(
+                                cursor.getString(cursor.getColumnIndexOrThrow(FileList_Provider.FILE_FULL))
+                        );
+                        getActivity().getFragmentManager().beginTransaction().remove(thisFragment).commit();
                     }
                 }
         );
+        ((ListView) popupListView.findViewById(R.id.fileopen_popuplist)).setOnItemLongClickListener(
+                new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                        Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                        ((DataReceiver) getActivity()).receiveFileName(
+                                cursor.getString(cursor.getColumnIndexOrThrow(FileList_Provider.FILE_FULL))
+                        );
+                        getActivity().getFragmentManager().beginTransaction().remove(thisFragment).commit();
+                    }
+                }
+        );
+
+        popupListView.findViewById(R.id.onModeCancelFile).setOnTouchListener(new myTouchListener(this));
+
+        return popupListView ;
     }
 
-    boolean popupVisible = false ;
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+    }
+
     private class myTouchListener implements View.OnTouchListener {
+        private Fragment parentFragment ;
+
+        public myTouchListener(Fragment fragment) {
+            parentFragment = fragment ;
+        }
+
         @Override
         public boolean onTouch(View view, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (view.getId() == R.id.btnNew)
-                    startActivity(new Intent(getActivity(), Main_Activity.class));
-                else if (view.getId() == R.id.btnOpen) {
-                    if( !popupVisible ) {
-                        popupWindow.showAtLocation(popupListView, Gravity.TOP, 0, (int) Math.round(screenHeight * 0.025));
-                        popupWindow.update((int) Math.round(screenWidth * 0.95), (int) Math.round(screenHeight * 0.95));
-                    }
-                    else
-                        popupWindow.dismiss() ;
-                    popupVisible = !popupVisible ;
-                    startActivity(new Intent(getActivity(), About_Activity.class));
-                }
-                else if (view.getId() == R.id.btnAbout)
-                    startActivity(new Intent(getActivity(), About_Activity.class));
-            }
-            return true;
+            ((DataReceiver) getActivity()).receiveFileName(null);
+            getActivity().getFragmentManager().beginTransaction().remove(parentFragment).commit();
+            return true ;
         }
     }
 }

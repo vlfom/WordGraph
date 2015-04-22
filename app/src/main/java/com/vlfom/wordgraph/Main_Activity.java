@@ -1,10 +1,14 @@
 package com.vlfom.wordgraph;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,7 +17,6 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -22,10 +25,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -38,11 +39,8 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,8 +49,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-public class Main_Activity extends ActionBarActivity {
-
+public class Main_Activity extends ActionBarActivity implements DataReceiver {
+    private String fileName ;
     final Integer
             NUMBER_NODE_TYPE = 1,
             TEXT_NODE_TYPE = 2;
@@ -102,6 +100,8 @@ public class Main_Activity extends ActionBarActivity {
     private Pair<Point, Point> tempLine = null;
     private ArrayList<Pair<Integer, Integer>> mSegments = new ArrayList<>();
 
+    DrawerLayout mDrawerLayout ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -133,7 +133,7 @@ public class Main_Activity extends ActionBarActivity {
         drawBackground();
 
         String[] mScreenTitles = getResources().getStringArray(R.array.navbar_string_array);
-        DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ListView mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         mDrawerList.setAdapter(new ArrayAdapter<>(this,
@@ -195,7 +195,7 @@ public class Main_Activity extends ActionBarActivity {
                             relativeLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                             relativeLayout.setPadding(10, 5, 10, 5);
                             final EditText editText = new EditText(Main_Activity.this);
-                            editText.setTextColor(Color.BLACK);
+                            editText.setTextColor(Color.WHITE);
                             editText.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                             relativeLayout.addView(editText);
 
@@ -225,6 +225,12 @@ public class Main_Activity extends ActionBarActivity {
         );
 
         findViewById(R.id.navigationDrawer).setAlpha(0.8f);
+
+        Intent thisIntent = getIntent() ;
+        if( thisIntent.hasExtra("file") )
+            receiveFileName(thisIntent.getStringExtra("file"));
+        else
+            fileName = null ;
     }
 
     private void addNewNode(Point nodePos, String nodeText, int nodeType, boolean addType) {
@@ -254,6 +260,8 @@ public class Main_Activity extends ActionBarActivity {
 
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
+                        if( currentMode != MODE_NONE )
+                            return true ;
                         switch (event.getAction()) {
                             case MotionEvent.ACTION_DOWN: {
                                 layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();
@@ -483,10 +491,45 @@ public class Main_Activity extends ActionBarActivity {
     private void selectItem(int position) {
         if (position == 0)
             setDefault();
-        else if (position == 1)
-            loadInfo();
-        else if (position == 2)
-            saveInfo();
+        else if (position == 1) {
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            Fragment fragment = new Menu_FragmentList() ;
+            fragmentTransaction.add(R.id.drawer_layout, fragment);
+
+            fragmentTransaction.commit();
+        }
+        else if (position == 2) {
+            if( fileName == null ) {
+                final RelativeLayout relativeLayout = new RelativeLayout(Main_Activity.this);
+                relativeLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                relativeLayout.setPadding(10, 5, 10, 5);
+                final EditText editText = new EditText(Main_Activity.this);
+                editText.setTextColor(Color.WHITE);
+                editText.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                relativeLayout.addView(editText);
+                new AlertDialog.Builder(Main_Activity.this)
+                        .setTitle("Enter file name:")
+                        .setView(relativeLayout)
+                        .setNegativeButton("Save file", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                String enteredText = editText.getText().toString();
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(FileList_Provider.FILE_NAME, enteredText);
+                                contentValues.put(FileList_Provider.FILE_FULL, enteredText + ".wg");
+                                getContentResolver().insert(FileList_Provider.FILELIST_URI, contentValues);
+                                saveFile(enteredText + ".wg");
+                            }
+                        })
+                        .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                            }
+                        })
+                        .show();
+            }
+            else
+                saveFile( fileName ) ;
+        }
         else if (position == 3)
             setDefault();
         (new Handler()).postDelayed(new Runnable() {
@@ -521,14 +564,14 @@ public class Main_Activity extends ActionBarActivity {
         Edges = new ArrayList<>();
     }
 
-    private void loadInfo() {
+    private void loadFile( String fileName ) {
         setDefault();
 
         try {
             File newFolder = new File(Environment.getExternalStorageDirectory(), "WordGraph.files");
             if (!newFolder.exists())
                 newFolder.mkdir();
-            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(newFolder + "/GraphFile.wg"));
+            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(newFolder + "/" + fileName));
 
             int nodes_counter = objectInputStream.readInt();
 
@@ -560,12 +603,12 @@ public class Main_Activity extends ActionBarActivity {
         }
     }
 
-    private void saveInfo() {
+    private void saveFile( String fileName ) {
         try {
             File newFolder = new File(Environment.getExternalStorageDirectory(), "WordGraph.files");
             if (!newFolder.exists())
                 newFolder.mkdir();
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(newFolder + "/GraphFile.wg"));
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(newFolder + "/" + fileName));
 
             objectOutputStream.writeInt(Nodes.size());
 
@@ -598,11 +641,25 @@ public class Main_Activity extends ActionBarActivity {
     }
 
     private long lastActionTime = 0 ;
+    @Override
+    public void receiveFileName( String name ) {
+        if( name == null )
+            return ;
+        fileName = name ;
+        loadFile(fileName) ;
+        (new Handler()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                redrawCanvas();
+            }
+        }, 1);
+    }
+
     private class ChangeModeListener implements View.OnTouchListener {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             long curActionTime = System.currentTimeMillis() ;
-            if( curActionTime - lastActionTime < 1000 )
+            if( curActionTime - lastActionTime < 200 )
                 return false ;
             lastActionTime = curActionTime ;
             if (currentMode != MODE_NONE) {
@@ -627,6 +684,8 @@ public class Main_Activity extends ActionBarActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             selectItem(position);
+            mDrawerLayout.closeDrawers();
         }
     }
+
 }
