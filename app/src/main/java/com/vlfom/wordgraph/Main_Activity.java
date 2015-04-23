@@ -612,8 +612,44 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                 saveFile(fileName);
             }
         } else if (position == 3) {
-            
-
+            final RelativeLayout relativeLayout = new RelativeLayout(Main_Activity.this);
+            relativeLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            relativeLayout.setPadding(10, 5, 10, 5);
+            final EditText editText = new EditText(Main_Activity.this);
+            editText.setTextColor(Color.WHITE);
+            editText.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            relativeLayout.addView(editText);
+            new AlertDialog.Builder(Main_Activity.this)
+                    .setTitle("Enter new file name:")
+                    .setView(relativeLayout)
+                    .setNegativeButton("Save file", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            String enteredText = editText.getText().toString();
+                            Cursor cursor = getContentResolver().query(
+                                    FileList_Provider.FILELIST_URI,
+                                    null,
+                                    FileList_Provider.FILE_NAME + "=?",
+                                    new String[]{
+                                            enteredText
+                                    },
+                                    null);
+                            if (!cursor.moveToFirst() || cursor.getCount() == 0) {
+                                fileName = enteredText;
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(FileList_Provider.FILE_NAME, fileName);
+                                contentValues.put(FileList_Provider.FILE_FULL, fileName + ".wg");
+                                getContentResolver().insert(FileList_Provider.FILELIST_URI, contentValues);
+                                saveFile(fileName + ".wg");
+                            } else
+                                Toast.makeText(getApplicationContext(), "File with such name already exists!", Toast.LENGTH_SHORT).show();
+                            cursor.close();
+                        }
+                    })
+                    .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                        }
+                    })
+                    .show();
         } else if (position == 4)
             setDefault();
         (new Handler()).postDelayed(new Runnable() {
