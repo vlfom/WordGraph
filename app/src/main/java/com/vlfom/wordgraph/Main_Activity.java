@@ -235,7 +235,7 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
             fileName = null ;
         else {
             fileName = receiveName;
-            loadFile(fileName);
+            loadFile(fileName + ".wg");
             (new Handler()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -593,23 +593,22 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                         })
                         .show();
             } else {
-                String fileNameShort = fileName.substring(0, fileName.length() - 3);
                 Cursor cursor = getContentResolver().query(
                         FileList_Provider.FILELIST_URI,
                         null,
                         FileList_Provider.FILE_NAME + "=?",
                         new String[]{
-                                fileNameShort
+                                fileName
                         },
                         null);
                 if (!cursor.moveToFirst() || cursor.getCount() == 0) {
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(FileList_Provider.FILE_NAME, fileNameShort);
-                    contentValues.put(FileList_Provider.FILE_FULL, fileNameShort + ".wg");
+                    contentValues.put(FileList_Provider.FILE_NAME, fileName);
+                    contentValues.put(FileList_Provider.FILE_FULL, fileName + ".wg");
                     getContentResolver().insert(FileList_Provider.FILELIST_URI, contentValues);
                 }
                 cursor.close();
-                saveFile(fileName);
+                saveFile(fileName + ".wg");
             }
         } else if (position == 3) {
             final RelativeLayout relativeLayout = new RelativeLayout(Main_Activity.this);
@@ -762,7 +761,7 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
         if( name == null )
             return ;
         fileName = name ;
-        loadFile(fileName) ;
+        loadFile(fileName + ".wg") ;
         (new Handler()).postDelayed(new Runnable() {
             @Override
             public void run() {

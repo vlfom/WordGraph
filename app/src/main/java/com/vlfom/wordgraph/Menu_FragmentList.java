@@ -59,7 +59,7 @@ public class Menu_FragmentList extends Fragment {
                                             int position, long id) {
                         Cursor cursor = (Cursor) parent.getItemAtPosition(position);
                         ((DataReceiver) getActivity()).receiveFileName(
-                                cursor.getString(cursor.getColumnIndexOrThrow(FileList_Provider.FILE_FULL))
+                                cursor.getString(cursor.getColumnIndexOrThrow(FileList_Provider.FILE_NAME))
                         );
                         getActivity().getFragmentManager().beginTransaction().remove(thisFragment).commit();
                     }
