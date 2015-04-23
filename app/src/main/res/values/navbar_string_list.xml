@@ -4,6 +4,7 @@
         <item>New file</item>
         <item>Open file</item>
         <item>Save file</item>
+        <item>Save file as</item>
         <item>Clear field</item>
     </string-array>
 </resources>

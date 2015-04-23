@@ -66,7 +66,6 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
             node_diameter = 40,
             small_node_diameter = 30;
     private final Handler handler = new Handler();
-    private Integer number_nodes_counter = 0;
     private RelativeLayout mainLayout;
     private int[] mainDisplacement = new int[2];
     private ImageView canvasLayout;
@@ -219,7 +218,6 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                                     })
                                     .setPositiveButton("Create empty node", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
-                                            ++number_nodes_counter;
                                             addNewNode(touchPoint, "", NUMBER_NODE_TYPE, false);
                                         }
                                     })
@@ -373,7 +371,7 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                                 NodesInfo.remove(NodeIndex) ;
                                 NodesPos.remove(NodeIndex) ;
-                                for( int i = 0 ; i < number_nodes_counter ; ++i )
+                                for( int i = 0 ; i < Nodes.size() ; ++i )
                                     for( int j = Edges.get(i).size()-1 ; j >= 0 ; --j )
                                         if( Edges.get(i).get(j) == NodeIndex )
                                             Edges.get(i).remove(j) ;
@@ -398,8 +396,6 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                                                 new Pair<>(mSegments.get(i).first, mSegments.get(i).second-1)
                                         ) ;
                                 }
-
-                                --number_nodes_counter ;
 
                                 Nodes.remove(thisLayout);
                                 mainLayout.removeView(thisLayout);
@@ -547,19 +543,17 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
 
     private void selectItem(int position) {
         if (position == 0) {
-            fileName = null ;
+            fileName = null;
             setDefault();
-        }
-        else if (position == 1) {
+        } else if (position == 1) {
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            Fragment fragment = new Menu_FragmentList() ;
+            Fragment fragment = new Menu_FragmentList();
             fragmentTransaction.add(R.id.drawer_layout, fragment);
 
             fragmentTransaction.commit();
-        }
-        else if (position == 2) {
-            if( fileName == null ) {
+        } else if (position == 2) {
+            if (fileName == null) {
                 final RelativeLayout relativeLayout = new RelativeLayout(Main_Activity.this);
                 relativeLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 relativeLayout.setPadding(10, 5, 10, 5);
@@ -581,17 +575,16 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                                                 enteredText
                                         },
                                         null);
-                                if( !cursor.moveToFirst() || cursor.getCount() == 0 ) {
-                                    fileName = enteredText ;
+                                if (!cursor.moveToFirst() || cursor.getCount() == 0) {
+                                    fileName = enteredText;
                                     ContentValues contentValues = new ContentValues();
                                     contentValues.put(FileList_Provider.FILE_NAME, fileName);
                                     contentValues.put(FileList_Provider.FILE_FULL, fileName + ".wg");
                                     getContentResolver().insert(FileList_Provider.FILELIST_URI, contentValues);
                                     saveFile(fileName + ".wg");
-                                }
-                                else
-                                    Toast.makeText(getApplicationContext(), "File with such name already exists!", Toast.LENGTH_SHORT).show() ;
-                                cursor.close() ;
+                                } else
+                                    Toast.makeText(getApplicationContext(), "File with such name already exists!", Toast.LENGTH_SHORT).show();
+                                cursor.close();
                             }
                         })
                         .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
@@ -599,9 +592,8 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                             }
                         })
                         .show();
-            }
-            else {
-                String fileNameShort = fileName.substring(0, fileName.length()-3) ;
+            } else {
+                String fileNameShort = fileName.substring(0, fileName.length() - 3);
                 Cursor cursor = getContentResolver().query(
                         FileList_Provider.FILELIST_URI,
                         null,
@@ -610,17 +602,19 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                                 fileNameShort
                         },
                         null);
-                if( !cursor.moveToFirst() || cursor.getCount() == 0 ) {
+                if (!cursor.moveToFirst() || cursor.getCount() == 0) {
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(FileList_Provider.FILE_NAME, fileNameShort);
                     contentValues.put(FileList_Provider.FILE_FULL, fileNameShort + ".wg");
                     getContentResolver().insert(FileList_Provider.FILELIST_URI, contentValues);
                 }
-                cursor.close() ;
+                cursor.close();
                 saveFile(fileName);
             }
-        }
-        else if (position == 3)
+        } else if (position == 3) {
+            
+
+        } else if (position == 4)
             setDefault();
         (new Handler()).postDelayed(new Runnable() {
             @Override
@@ -645,7 +639,6 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
     private void setDefault() {
         mSegments = new ArrayList<>();
         redrawCanvas();
-        number_nodes_counter = 0;
         for (FrameLayout node : Nodes)
             mainLayout.removeView(node);
         NodesInfo = new ArrayList<>();
@@ -671,11 +664,8 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
             for (int i = 0; i < nodes_counter; ++i)
                 NodesPos.add(new Point(objectInputStream.readInt(), objectInputStream.readInt()));
 
-            for (int i = 0; i < nodes_counter; ++i) {
-                if (NodesInfo.get(i).second == 1)
-                    ++number_nodes_counter;
+            for (int i = 0; i < nodes_counter; ++i)
                 addNewNode(NodesPos.get(i), NodesInfo.get(i).first, NodesInfo.get(i).second, true);
-            }
 
             for (int i = 0; i < nodes_counter; ++i) {
                 Edges.add(new ArrayList<Integer>());
