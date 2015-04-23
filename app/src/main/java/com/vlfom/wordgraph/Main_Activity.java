@@ -60,12 +60,11 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
     final Integer
             MODE_NONE = 0,
             MODE_CREATE = 1,
-            MODE_CONNECT = 2,
-            MODE_DELETE = 3;
+            MODE_DELETE = 2;
     private int currentMode = MODE_NONE;
-    private final int
-            node_diameter = 60,
-            small_node_diameter = 40;
+    private int
+            node_diameter = 40,
+            small_node_diameter = 30;
     private final Handler handler = new Handler();
     private Integer number_nodes_counter = 0;
     private RelativeLayout mainLayout;
@@ -109,6 +108,10 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        float scale = getApplicationContext().getResources().getDisplayMetrics().density;
+        node_diameter = (int)( node_diameter*scale + 0.5f ) ;
+        small_node_diameter = (int)( small_node_diameter*scale + 0.5f ) ;
 
         ((TextView) findViewById(R.id.navbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
         ((TextView) findViewById(R.id.navbarTitle)).setShadowLayer(2, 0, 1, Color.BLACK);
@@ -217,7 +220,7 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                                     .setPositiveButton("Create empty node", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
                                             ++number_nodes_counter;
-                                            addNewNode(touchPoint, number_nodes_counter.toString(), NUMBER_NODE_TYPE, false);
+                                            addNewNode(touchPoint, "", NUMBER_NODE_TYPE, false);
                                         }
                                     })
                                     .show();
@@ -415,7 +418,6 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
         );
 
         ((TextView) frameLayout.findViewById(R.id.vertex_number)).setText(nodeText);
-
         RelativeLayout.LayoutParams mNParams;
         if (nodeType == TEXT_NODE_TYPE) {
             mNParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, node_diameter);
@@ -599,18 +601,19 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                         .show();
             }
             else {
+                String fileNameShort = fileName.substring(0, fileName.length()-3) ;
                 Cursor cursor = getContentResolver().query(
                         FileList_Provider.FILELIST_URI,
                         null,
                         FileList_Provider.FILE_NAME + "=?",
                         new String[]{
-                                fileName
+                                fileNameShort
                         },
                         null);
                 if( !cursor.moveToFirst() || cursor.getCount() == 0 ) {
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(FileList_Provider.FILE_NAME, fileName);
-                    contentValues.put(FileList_Provider.FILE_FULL, fileName + ".wg");
+                    contentValues.put(FileList_Provider.FILE_NAME, fileNameShort);
+                    contentValues.put(FileList_Provider.FILE_FULL, fileNameShort + ".wg");
                     getContentResolver().insert(FileList_Provider.FILELIST_URI, contentValues);
                 }
                 cursor.close() ;
