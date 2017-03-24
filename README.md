@@ -1,14 +1,14 @@
-#Концепция продукта
+# WordGraph
+Android application for learning languages and tricky words through associations.
 
-###Краткое описание
-Приложение для изучения языков и сложных слов с помощью ассоциаций.
+### Requirements
+- Android >= 4.2
+- Access to the internet
+- Access to the memory card
 
-###Определение технических требований к приложению
--	Android >= 4.2
-- Доступ к карте памяти
-- Доступ к интернету
-
-###Потенциальная аудитория
-- Люди, которым необходимо записывать полезные вещи, связанные с работой
-- Люди, изучающие новые слова, которые целесообразно связывать с помощью ассоциаций
-- Люди, изучающие иностранные языки
+### Screenshots
+<p align="center">
+<img src="https://github.com/vlfom/WordGraph/blob/master/screenshots/1.png" width="200"> 
+<img src="https://github.com/vlfom/WordGraph/blob/master/screenshots/2.png" width="200"> 
+<img src="https://github.com/vlfom/WordGraph/blob/master/screenshots/3.png" width="200"> 
+</p>
