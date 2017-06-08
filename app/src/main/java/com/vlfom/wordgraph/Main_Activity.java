@@ -113,9 +113,7 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
         small_node_diameter = (int)( small_node_diameter*scale + 0.5f ) ;
 
         ((TextView) findViewById(R.id.navbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
-        ((TextView) findViewById(R.id.navbarTitle)).setShadowLayer(2, 0, 1, Color.BLACK);
         ((TextView) findViewById(R.id.actionbarTitle)).setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf"));
-        ((TextView) findViewById(R.id.actionbarTitle)).setShadowLayer(2, 0, 1, Color.BLACK);
 
         findViewById(R.id.onModeCreate).setOnTouchListener(
                 new ChangeModeListener()
@@ -228,7 +226,7 @@ public class Main_Activity extends ActionBarActivity implements DataReceiver {
                 }
         );
 
-        findViewById(R.id.navigationDrawer).setAlpha(0.8f);
+        findViewById(R.id.navigationDrawer).setAlpha(0.95f);
 
         String receiveName = getIntent().getStringExtra("file") ;
         if( receiveName.equals("null") )

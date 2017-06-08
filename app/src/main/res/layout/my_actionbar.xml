@@ -17,11 +17,11 @@
             android:id="@+id/actionbarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="14sp"
             android:background="@android:color/transparent"
             android:text="Word Graph"
             android:textColor="@android:color/white"
-            android:textSize="24sp" />
+            android:textSize="20sp" />
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout
